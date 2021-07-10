@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.testmanage.mapper.CaseInfoMapper">
+
+    <sql id="table">caseinfo</sql>
+
+    <insert id="insertCase" parameterType="com.testmanage.entity.CaseInfo">
+        insert into
+        <include refid="table"/>
+        (case_id,case_name)
+        values
+        (#{case_id},#{case_name});
+    </insert>
+
+    <update id="updateCase" parameterType="com.testmanage.entity.CaseInfo">
+
+    </update>
+    <delete id="deleteCase"></delete>
+    <select id="findByCaseId" resultType="com.testmanage.entity.CaseInfo"></select>
+    <select id="findAll" resultType="com.testmanage.entity.CaseInfo"></select>
+    <select id="findByCreateUser" resultType="com.testmanage.entity.CaseInfo"></select>
+</mapper>
