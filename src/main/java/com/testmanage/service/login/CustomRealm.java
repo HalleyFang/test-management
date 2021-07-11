@@ -3,7 +3,7 @@ package com.testmanage.service.login;
 import com.testmanage.entity.Permissions;
 import com.testmanage.entity.Role;
 import com.testmanage.entity.User;
-import com.testmanage.service.login.LoginService;
+import com.testmanage.service.UserService;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -20,19 +20,19 @@ import org.springframework.util.StringUtils;
 public class CustomRealm extends AuthorizingRealm {
 
     @Autowired
-    LoginService loginService;
+    UserService userService;
 
     /**
-     * @Description 权限配置
      * @param principalCollection
      * @return
+     * @Description 权限配置
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         //获取登录用户名
         String name = (String) principalCollection.getPrimaryPrincipal();
         //查询用户名称
-        User user = loginService.getUserByName(name);
+        User user = userService.getUserByName(name);
         //添加角色和权限
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
         for (Role role : user.getRoles()) {
@@ -47,10 +47,10 @@ public class CustomRealm extends AuthorizingRealm {
     }
 
     /**
-     * @Description 认证配置
      * @param authenticationToken
      * @return
      * @throws AuthenticationException
+     * @Description 认证配置
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
@@ -59,7 +59,7 @@ public class CustomRealm extends AuthorizingRealm {
         }
         //获取用户信息
         String name = authenticationToken.getPrincipal().toString();
-        User user = loginService.getUserByName(name);
+        User user = userService.getUserByName(name);
         if (user == null) {
             //这里返回后会报出对应异常
             return null;
@@ -67,5 +67,6 @@ public class CustomRealm extends AuthorizingRealm {
             //这里验证authenticationToken和simpleAuthenticationInfo的信息
             SimpleAuthenticationInfo simpleAuthenticationInfo = new SimpleAuthenticationInfo(name, user.getPassword().toString(), getName());
             return simpleAuthenticationInfo;
-        }    }
+        }
+    }
 }
