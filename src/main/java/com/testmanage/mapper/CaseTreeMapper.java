@@ -1,17 +1,17 @@
 package com.testmanage.mapper;
 
-import com.testmanage.entity.CaseTree;
+import com.testmanage.entity.CaseTreeNode;
 
 import java.util.List;
 
 public interface CaseTreeMapper {
 
-    void addTree(List<CaseTree> listTree);
+    void addTree(CaseTreeNode caseTreeNode);
 
-    void updateTree(List<CaseTree> listTree);
+    void updateTree(CaseTreeNode caseTreeNode);
 
 
-    List<CaseTree> findTree();
+    List<CaseTreeNode> findTree();
 
-    CaseTree findTreeById();
+    CaseTreeNode findTreeById(Long id);
 }

@@ -57,6 +57,11 @@
             <artifactId>postgresql</artifactId>
             <version>42.2.23</version>
         </dependency>
+        <dependency>
+            <groupId>org.jodd</groupId>
+            <artifactId>jodd-json</artifactId>
+            <version>3.9.1</version>
+        </dependency>
     </dependencies>
 
     <build>

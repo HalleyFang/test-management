@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class CaseTree {
+public class CaseTreeNode {
 
     private Long id;
     private String node_name;
