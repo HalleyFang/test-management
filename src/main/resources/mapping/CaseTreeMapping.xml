@@ -6,6 +6,7 @@
     <insert id="addTree"></insert>
     <update id="updateTree"></update>
     <select id="findTree" resultType="com.testmanage.entity.CaseTreeNode"></select>
+    <select id="findTreeByParent" resultType="com.testmanage.entity.CaseTreeNode"></select>
     <select id="findTreeById" resultType="com.testmanage.entity.CaseTreeNode"></select>
 
 
