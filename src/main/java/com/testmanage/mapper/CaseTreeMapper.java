@@ -1,6 +1,6 @@
 package com.testmanage.mapper;
 
-import com.testmanage.entity.CaseTree;
+import com.testmanage.entity.CaseTreeNode;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -8,11 +8,13 @@ import java.util.List;
 @Mapper
 public interface CaseTreeMapper {
 
-    void addTree(List<CaseTree> listTree);
+    void addTree(CaseTreeNode caseTreeNode);
 
-    void updateTree(List<CaseTree> listTree);
+    void updateTree(CaseTreeNode caseTreeNode);
 
-    List<CaseTree> findTree();
+    List<CaseTreeNode> findTree();
 
-    CaseTree findTreeById();
+    List<CaseTreeNode> findTreeByParent(Long parentId);
+
+    CaseTreeNode findTreeById(Long id);
 }

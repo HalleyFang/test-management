@@ -1,6 +1,7 @@
 package com.testmanage.service.login;
 
 import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
@@ -9,7 +10,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.servlet.Filter;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 
@@ -49,6 +52,8 @@ public class ShiroConfig {
         map.put("/logout", "logout");
         //对所有用户认证
         map.put("/**", "authc");
+        //authc:所有url必须通过认证才能访问，anon:所有url都可以匿名访问
+        map.put("/**", "corsAuthenticationFilter");
         //登录
         shiroFilterFactoryBean.setLoginUrl("/login");
         //首页
@@ -56,6 +61,10 @@ public class ShiroConfig {
         //错误页面，认证不通过跳转
         shiroFilterFactoryBean.setUnauthorizedUrl("/error");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(map);
+        //自定义过滤器
+        Map<String, Filter> filterMap = new LinkedHashMap<>();
+        filterMap.put("corsAuthenticationFilter", corsAuthenticationFilter());
+        shiroFilterFactoryBean.setFilters(filterMap);
         return shiroFilterFactoryBean;
     }
 
@@ -67,4 +76,14 @@ public class ShiroConfig {
         return authorizationAttributeSourceAdvisor;
     }
 
+    @Bean
+    public CORSAuthenticationFilter corsAuthenticationFilter(){
+        return new CORSAuthenticationFilter();
+    }
+
+    //自定义sessionManager
+    @Bean
+    public SessionManager sessionManager() {
+        return new CustomSessionManager();
+    }
 }

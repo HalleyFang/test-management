@@ -5,8 +5,9 @@
     <sql id="table">case_tree</sql>
     <insert id="addTree"></insert>
     <update id="updateTree"></update>
-    <select id="findTree" resultType="com.testmanage.entity.CaseTree"></select>
-    <select id="findTreeById" resultType="com.testmanage.entity.CaseTree"></select>
+    <select id="findTree" resultType="com.testmanage.entity.CaseTreeNode"></select>
+    <select id="findTreeByParent" resultType="com.testmanage.entity.CaseTreeNode"></select>
+    <select id="findTreeById" resultType="com.testmanage.entity.CaseTreeNode"></select>
 
 
 </mapper>
