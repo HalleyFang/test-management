@@ -13,7 +13,7 @@ public class CaseInfo implements Serializable {
     private String case_id;
     private String case_name;
     private String case_pre;
-    private JsonObject case_step;
+    private String case_step;
     private String case_post;
     private String remark;
     private Boolean is_delete;

@@ -7,16 +7,58 @@
     <insert id="insertCase" parameterType="com.testmanage.entity.CaseInfo">
         insert into
         <include refid="table"/>
-        (case_id,case_name)
+        (case_id,case_name,case_pre,case_step,case_post,remark,create_user,create_time)
         values
-        (#{case_id},#{case_name});
+        (#{case_id},#{case_name},#{case_pre},#{case_step},#{case_post},
+        #{remark},#{create_user},#{create_time,jdbcType=TIMESTAMP});
     </insert>
 
     <update id="updateCase" parameterType="com.testmanage.entity.CaseInfo">
-
+        update
+        <include refid="table"/>
+        set
+        <if test="case_pre != null and case_pre != ''">
+            case_pre=#{case_pre},
+        </if>
+        <if test="case_step != null and case_step != ''">
+            case_step=#{case_step},
+        </if>
+        <if test="case_post != null and case_post != ''">
+            case_post=#{case_post},
+        </if>
+        <if test="remark != null and remark != ''">
+            remark=#{remark},
+        </if>
+        update_user=#{update_user},update_time=#{update_time,jdbcType=TIMESTAMP}
+        where
+        case_id=#{case_id}
     </update>
-    <delete id="deleteCase"></delete>
-    <select id="findByCaseId" resultType="com.testmanage.entity.CaseInfo"></select>
-    <select id="findAll" resultType="com.testmanage.entity.CaseInfo"></select>
-    <select id="findByCreateUser" resultType="com.testmanage.entity.CaseInfo"></select>
+
+    <delete id="deleteCase">
+        update
+        <include refid="table"/>
+        set
+        is_delete=true
+        where
+        case_id=#{case_id}
+    </delete>
+
+    <select id="findByCaseId" resultType="com.testmanage.entity.CaseInfo">
+        select * from
+        <include refid="table"/>
+        where
+        case_id=#{case_id}
+    </select>
+
+    <select id="findAll" resultType="com.testmanage.entity.CaseInfo">
+        select * from
+        <include refid="table"/>
+    </select>
+
+    <select id="findByCreateUser" resultType="com.testmanage.entity.CaseInfo">
+        select * from
+        <include refid="table"/>
+        where
+        create_user=#{create_user}
+    </select>
 </mapper>
