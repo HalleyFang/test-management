@@ -1,6 +1,6 @@
 package com.testmanage.service;
 
-import com.testmanage.entity.User;
+import com.testmanage.entity.MyUser;
 import com.testmanage.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +11,8 @@ public class UserService {
     @Autowired
     UserMapper userMapper;
 
-    public User getUserByName(String name){
-        return userMapper.getUserByName(name);
+    public MyUser getUserByName(String name){
+        MyUser user = userMapper.getUserByName(name);
+        return user;
     }
 }

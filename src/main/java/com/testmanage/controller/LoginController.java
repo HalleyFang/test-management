@@ -1,6 +1,7 @@
 package com.testmanage.controller;
 
-import com.testmanage.entity.User;
+import com.testmanage.entity.MyUser;
+import com.testmanage.utils.JsonParse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -10,23 +11,28 @@ import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.subject.Subject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @Slf4j
 public class LoginController {
 
+
     @RequestMapping(path = "/login", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")
-    public String login(User user) {
+    public Map<String, Object> login(@RequestBody String body, HttpServletResponse response) {
+        MyUser user = JsonParse.getGson().fromJson(JsonParse.StringToJson(body), MyUser.class);
+        Map<String, Object> result = new HashMap<>();
         if (StringUtils.isEmpty(user.getUsername()) || StringUtils.isEmpty(user.getPassword())) {
-            return "请输入用户名和密码！";
+            result.put("status", 400);
+            result.put("msg", "请输入用户名和密码！");
+            return result;
         }
         //用户认证信息
         Subject subject = SecurityUtils.getSubject();
@@ -41,15 +47,23 @@ public class LoginController {
 //            subject.checkPermissions("query", "add");
         } catch (UnknownAccountException e) {
             log.error("用户名不存在！", e);
-            return "用户名不存在！";
+            result.put("status", 500);
+            result.put("msg", "用户名不存在！");
+            return result;
         } catch (AuthenticationException e) {
             log.error("账号或密码错误！", e);
-            return "账号或密码错误！";
+            result.put("status", 500);
+            result.put("msg", "账号或密码错误！");
+            return result;
         } catch (AuthorizationException e) {
-            log.error("没有权限！", e);
-            return "没有权限";
+            result.put("status", 401);
+            result.put("msg", "没有权限！");
+            return result;
         }
-        return "login success";
+        result.put("status", 200);
+        result.put("msg", "登录成功！");
+        result.put("username", user.getUsername());
+        return result;
     }
 
     @RequiresRoles("admin")

@@ -8,9 +8,9 @@ import java.util.Set;
 
 @Data
 @AllArgsConstructor
-public class User implements Serializable {
+public class MyUser implements Serializable {
 
-    private Long id;
+    private int id;
     private String username;
     private String password;
     private Set<Role> roles;

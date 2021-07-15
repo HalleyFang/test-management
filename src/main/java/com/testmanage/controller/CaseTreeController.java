@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 @RestController
-@RequestMapping(path = "/api/tree")
+@RequestMapping(path = "/tree")
 @Slf4j
 public class CaseTreeController {
 

@@ -2,7 +2,7 @@ package com.testmanage.service.login;
 
 import com.testmanage.entity.Permissions;
 import com.testmanage.entity.Role;
-import com.testmanage.entity.User;
+import com.testmanage.entity.MyUser;
 import com.testmanage.service.UserService;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -32,7 +32,7 @@ public class CustomRealm extends AuthorizingRealm {
         //获取登录用户名
         String name = (String) principalCollection.getPrimaryPrincipal();
         //查询用户名称
-        User user = userService.getUserByName(name);
+        MyUser user = userService.getUserByName(name);
         //添加角色和权限
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
         for (Role role : user.getRoles()) {
@@ -59,7 +59,7 @@ public class CustomRealm extends AuthorizingRealm {
         }
         //获取用户信息
         String name = authenticationToken.getPrincipal().toString();
-        User user = userService.getUserByName(name);
+        MyUser user = userService.getUserByName(name);
         if (user == null) {
             //这里返回后会报出对应异常
             return null;

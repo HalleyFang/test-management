@@ -30,10 +30,11 @@ public class CORSAuthenticationFilter extends FormAuthenticationFilter {
     }
 
 
-    @Override
+   /* @Override
     protected boolean onAccessDenied(ServletRequest request, ServletResponse response) {
         HttpServletResponse res = (HttpServletResponse) response;
         res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Content-type","application/json;charset=UTF-8");
         res.setStatus(HttpServletResponse.SC_OK);
         res.setCharacterEncoding("UTF-8");
         PrintWriter writer = null;
@@ -54,5 +55,5 @@ public class CORSAuthenticationFilter extends FormAuthenticationFilter {
             }
         }
         return false;
-    }
+    }*/
 }

@@ -1,6 +1,6 @@
 package com.testmanage.mapper;
 
-import com.testmanage.entity.User;
+import com.testmanage.entity.MyUser;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -8,9 +8,9 @@ import java.util.List;
 @Mapper
 public interface UserMapper {
 
-    User addUser(User user);
-    User updateUser(User user);
-    User deleteUser(User user);
-    User getUserByName(String name);
-    List<User> getAllUser();
+    MyUser addUser(MyUser user);
+    MyUser updateUser(MyUser user);
+    MyUser deleteUser(MyUser user);
+    MyUser getUserByName(String username);
+    List<MyUser> getAllUser();
 }
