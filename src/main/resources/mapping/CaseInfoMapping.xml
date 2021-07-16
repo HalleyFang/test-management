@@ -17,6 +17,9 @@
         update
         <include refid="table"/>
         set
+        <if test="case_name != null and case_name != ''">
+            case_name=#{case_name},
+        </if>
         <if test="case_pre != null and case_pre != ''">
             case_pre=#{case_pre},
         </if>

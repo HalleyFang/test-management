@@ -2,11 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.testmanage.mapper.CaseTreeMapper">
 
-    <sql id="table">case_tree</sql>
+    <sql id="table">casetreenode</sql>
     <insert id="addTree"></insert>
     <update id="updateTree"></update>
     <select id="findTree" resultType="com.testmanage.entity.CaseTreeNode"></select>
-    <select id="findTreeByParent" resultType="com.testmanage.entity.CaseTreeNode"></select>
+    <select id="findTreeByParent" resultType="com.testmanage.entity.CaseTreeNode">
+        select * from
+        <include refid="table"></include>
+        where
+        parent_id=#{parent_id}
+    </select>
     <select id="findTreeById" resultType="com.testmanage.entity.CaseTreeNode"></select>
 
 

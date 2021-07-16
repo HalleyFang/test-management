@@ -23,7 +23,7 @@ public class CaseInfoService {
         caseInfoMapper.deleteCase(caseInfo);
     }
 
-    public void queryCase(String caseId){
-        caseInfoMapper.findByCaseId(caseId);
+    public CaseInfo queryCase(String caseId){
+        return caseInfoMapper.findByCaseId(caseId);
     }
 }

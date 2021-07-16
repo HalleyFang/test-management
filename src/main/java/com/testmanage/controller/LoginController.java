@@ -23,7 +23,6 @@ import java.util.Map;
 @Slf4j
 public class LoginController {
 
-
     @RequestMapping(path = "/login", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")
     public Map<String, Object> login(@RequestBody String body, HttpServletResponse response) {

@@ -1,9 +1,11 @@
 package com.testmanage.service;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.testmanage.entity.CaseTreeNode;
 import com.testmanage.mapper.CaseTreeMapper;
+import com.testmanage.utils.JsonParse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -133,14 +135,51 @@ public class CaseTreeService {
 
     @Cacheable(value = "tree")
     public String getTree() {
-        String tree = null;
-        return tree;
+        return generateTree(0L, null, null);
     }
 
     @CachePut(value = "tree")
     public String refreshTree() {
-        String tree = null;
-        return tree;
+        return generateTree(0L, null, null);
+    }
+
+
+    private String generateTree(Long id, JsonObject jsonObject, Map<Long, JsonArray> map) {
+        JsonArray treeJson = new JsonArray();
+        List<CaseTreeNode> treeNodeList = caseTreeMapper.findTreeByParent(id);
+        if (treeNodeList.size() == 0) {
+            return null;
+        }
+        for (CaseTreeNode node : treeNodeList) {
+            if (node.getIs_dir() && !node.getIs_delete()) {
+                if (id == 0) {
+                    //根节点
+                    jsonObject = new JsonObject();
+                    jsonObject.addProperty("label", node.getLabel());
+                    JsonArray j = new JsonArray();
+                    jsonObject.add("children", j);
+                    map = new HashMap<>();
+                    map.put(node.getId(), j);
+                } else {
+                    JsonArray jsonArray = map.get(id).getAsJsonArray();
+                    JsonObject j2 = new JsonObject();
+                    j2.addProperty("label", node.getLabel());
+                    JsonArray j = new JsonArray();
+                    j2.add("children", j);
+                    jsonArray.add(j2);
+                    map.put(node.getId(), j);
+                }
+                generateTree(node.getId(), jsonObject, map);
+            }
+            if (!node.getIs_dir() && !node.getIs_delete()) {
+                JsonArray jsonArray = map.get(id).getAsJsonArray();
+                String str = JsonParse.getGson().toJson(node);
+                jsonArray.add(JsonParse.StringToJson(str));
+            }
+            treeJson.add(jsonObject);
+        }
+
+        return treeJson.toString();
     }
 
 }

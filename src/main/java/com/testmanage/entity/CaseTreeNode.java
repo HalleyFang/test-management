@@ -8,9 +8,10 @@ import java.util.Date;
 public class CaseTreeNode {
 
     private Long id;
-    private String node_name;
+    private String label;
     private String case_id;
     private Boolean is_dir;
+    private Integer status;
     private Long parent_id;
     private Long pre_id;
     private Long post_id;

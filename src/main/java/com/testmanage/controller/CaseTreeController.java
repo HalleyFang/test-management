@@ -24,7 +24,10 @@ public class CaseTreeController {
             produces = "application/json;charset=UTF-8")
     public HttpServletResponse getTree(HttpServletResponse resp){
         resp.setHeader("content-type", "application/json;charset=UTF-8");
-        String data="{\"id\":1}";
+        String data=caseTreeService.getTree();
+        if(data.isEmpty()){
+            return null;
+        }
         OutputStream outputStream = null;
         try {
             outputStream = resp.getOutputStream();
@@ -39,6 +42,6 @@ public class CaseTreeController {
                 e.printStackTrace();
             }
         }
-        return resp;
+        return null;
     }
 }

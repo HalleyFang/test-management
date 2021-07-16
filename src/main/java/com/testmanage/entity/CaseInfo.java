@@ -1,6 +1,5 @@
 package com.testmanage.entity;
 
-import com.google.gson.JsonObject;
 import lombok.Data;
 
 import java.io.Serializable;
