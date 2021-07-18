@@ -19,6 +19,9 @@ public class CORSAuthenticationFilter extends FormAuthenticationFilter {
             if (((HttpServletRequest) request).getMethod().toUpperCase().equals("OPTIONS")) {
                 return true;
             }
+            if(((HttpServletRequest) request).getRequestURI().contains("/img/")){
+                return true;
+            }
         }
         return super.isAccessAllowed(request, response, mappedValue);
     }

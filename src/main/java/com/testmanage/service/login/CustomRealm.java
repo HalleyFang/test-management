@@ -1,7 +1,7 @@
 package com.testmanage.service.login;
 
 import com.testmanage.entity.Permissions;
-import com.testmanage.entity.Role;
+import com.testmanage.entity.Roles;
 import com.testmanage.entity.MyUser;
 import com.testmanage.service.UserService;
 import org.apache.shiro.authc.AuthenticationException;
@@ -35,7 +35,7 @@ public class CustomRealm extends AuthorizingRealm {
         MyUser user = userService.getUserByName(name);
         //添加角色和权限
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
-        for (Role role : user.getRoles()) {
+        for (Roles role : user.getRoles()) {
             //添加角色
             simpleAuthorizationInfo.addRole(role.getRoleName());
             //添加权限

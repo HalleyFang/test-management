@@ -13,5 +13,6 @@ public class MyUser implements Serializable {
     private int id;
     private String username;
     private String password;
-    private Set<Role> roles;
+    private Set<Roles> roles;
+    private Set<Permissions> Permissions;
 }

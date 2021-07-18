@@ -48,10 +48,6 @@ public class ShiroConfig {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
         shiroFilterFactoryBean.setSecurityManager(securityManager);
         Map<String, String> map = new HashMap<>();
-        //登出
-        map.put("/logout", "logout");
-        //对所有用户认证
-        map.put("/**", "authc");
         //authc:所有url必须通过认证才能访问，anon:所有url都可以匿名访问
         map.put("/**", "corsAuthenticationFilter");
         //登录

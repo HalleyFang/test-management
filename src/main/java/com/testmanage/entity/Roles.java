@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Data
 @AllArgsConstructor
-public class Role implements Serializable {
+public class Roles implements Serializable {
 
     private Long id;
     private String roleName;

@@ -62,6 +62,8 @@ public class LoginController {
         result.put("status", 200);
         result.put("msg", "登录成功！");
         result.put("username", user.getUsername());
+        result.put("roles", user.getRoles());
+        result.put("permissions", user.getPermissions());
         return result;
     }
 
@@ -82,4 +84,6 @@ public class LoginController {
     public String add() {
         return "add success!";
     }
+
+
 }
