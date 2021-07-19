@@ -25,7 +25,7 @@ public class CaseTreeController {
     public HttpServletResponse getTree(HttpServletResponse resp){
         resp.setHeader("content-type", "application/json;charset=UTF-8");
         String data=caseTreeService.getTree();
-        if(data.isEmpty()){
+        if(data == null || data.isEmpty()){
             return null;
         }
         OutputStream outputStream = null;
