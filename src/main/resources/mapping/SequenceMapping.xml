@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.testmanage.mapper.SequenceMapper">
+
+    <sql id="table">sequence</sql>
+    <update id="update">
+        update
+        <include refid="table"></include>
+        set id=#{id}
+        where
+        name=#{name}
+    </update>
+    <select id="getNext" resultType="java.lang.Integer">
+        select id from
+        <include refid="table"></include>
+        where
+        name=#{name}
+    </select>
+
+
+</mapper>

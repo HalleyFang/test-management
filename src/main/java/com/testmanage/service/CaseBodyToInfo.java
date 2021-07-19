@@ -17,10 +17,13 @@ public class CaseBodyToInfo {
     @Autowired
     CaseInfoMapper caseInfoMapper;
 
+    @Autowired
+    CaseInfoService caseInfoService;
+
     public CaseInfo caseBodyToInfo(String body) throws Exception {
         JsonObject bodyJson = JsonParse.StringToJson(body);
         CaseInfo caseInfo = new CaseInfo();
-        String case_id = getCaseId();
+        String case_id = caseInfoService.getCaseId();
         caseInfo.setCase_id(case_id);
         String case_name = bodyJson.get("case_name").getAsString();
         if (case_name.isEmpty()) {
@@ -44,20 +47,5 @@ public class CaseBodyToInfo {
         return caseInfo;
     }
 
-    private String getCaseId() {
-        Integer id = SequenceUtil.getSequenceUtil().getNext();
-        String pre = "";
-        if (id < 10) {
-            pre = "0000";
-        } else if (id >= 10 && id < 100) {
-            pre = "000";
-        } else if (id >= 100 && id < 1000) {
-            pre = "00";
-        } else if (id >= 1000 && id < 10000) {
-            pre = "0";
-        } else {
-            log.warn("there are too many cases !");
-        }
-        return "case-" + pre + id;
-    }
+
 }

@@ -10,7 +10,11 @@ public interface CaseInfoMapper {
 
     void insertCase(CaseInfo info);
 
+    void insertCaseBach(List<CaseInfo> caseInfos);
+
     void updateCase(CaseInfo info);
+
+    void updateCaseBatch(List<CaseInfo> caseInfos);
 
     void deleteCase(CaseInfo info);
 

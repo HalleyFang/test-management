@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.testmanage.mapper.CaseTreeMapper">
 
-    <sql id="table">casetreenode</sql>
+    <sql id="table">case_tree_node</sql>
     <insert id="addTree"></insert>
     <update id="updateTree"></update>
     <select id="findTree" resultType="com.testmanage.entity.CaseTreeNode"></select>

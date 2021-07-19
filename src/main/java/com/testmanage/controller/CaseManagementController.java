@@ -3,16 +3,23 @@ package com.testmanage.controller;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.testmanage.entity.CaseInfo;
+import com.testmanage.entity.ExcelCase;
 import com.testmanage.service.CaseBodyToInfo;
 import com.testmanage.service.CaseInfoService;
+import com.testmanage.utils.ExcelUtils;
 import com.testmanage.utils.JsonParse;
+import com.testmanage.utils.SequenceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/case")
@@ -24,6 +31,9 @@ public class CaseManagementController {
 
     @Autowired
     CaseBodyToInfo caseBodyToInfo;
+
+    @Autowired
+    SequenceUtil sequenceUtil;
 
     @RequestMapping(path = "/add", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")
@@ -70,5 +80,31 @@ public class CaseManagementController {
         return null;
     }
 
+
+    @RequestMapping(path = "/importExcel", method = RequestMethod.POST)
+    public void importExcel(@RequestBody MultipartFile file){
+        try {
+            InputStream inputStream = file.getInputStream();
+            ExcelUtils<ExcelCase> excelUtil = new ExcelUtils<>(ExcelCase.class);
+            List<ExcelCase> excelCases = excelUtil.importExcel(null, inputStream);
+            List<CaseInfo> caseInfosInsert = new ArrayList<>();
+            List<CaseInfo> caseInfosUpdate = new ArrayList<>();
+            for (ExcelCase excelCase : excelCases){
+                CaseInfo caseInfo = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(excelCase),CaseInfo.class);
+                if(!caseInfo.getCase_id().isEmpty()) {
+                    caseInfosUpdate.add(caseInfo);
+                    continue;
+                }
+                caseInfo.setCase_id(caseInfoService.getCaseId());
+                caseInfo.setId(sequenceUtil.getNext("caseInfo"));
+                caseInfosInsert.add(caseInfo);
+            }
+            caseInfoService.addCase(caseInfosInsert);
+            caseInfoService.updateCase(caseInfosUpdate);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
 }

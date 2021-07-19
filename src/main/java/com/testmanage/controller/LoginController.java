@@ -14,8 +14,8 @@ import org.apache.shiro.subject.Subject;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +23,7 @@ import java.util.Map;
 @Slf4j
 public class LoginController {
 
-    @RequestMapping(path = "/login", method = RequestMethod.POST,
+    @RequestMapping(path = "/login", method = {RequestMethod.POST},
             produces = "application/json;charset=UTF-8")
     public Map<String, Object> login(@RequestBody String body, HttpServletResponse response) {
         MyUser user = JsonParse.getGson().fromJson(JsonParse.StringToJson(body), MyUser.class);
