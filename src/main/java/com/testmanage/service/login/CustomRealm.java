@@ -3,7 +3,7 @@ package com.testmanage.service.login;
 import com.testmanage.entity.Permissions;
 import com.testmanage.entity.Roles;
 import com.testmanage.entity.MyUser;
-import com.testmanage.service.UserService;
+import com.testmanage.service.user.UserService;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;

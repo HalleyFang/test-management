@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.testmanage.entity.CaseTreeNode;
 import com.testmanage.mapper.CaseTreeMapper;
+import com.testmanage.service.user.UserContext;
 import com.testmanage.utils.JsonParse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -38,6 +39,7 @@ public class CaseTreeService {
                     currentNode.setPost_id((Long) resultMap.get("postId"));
                 }
             }
+            currentNode.setIs_v(UserContext.get().getIsV());
             caseTreeMapper.addTree(currentNode);
         }
 
@@ -92,7 +94,7 @@ public class CaseTreeService {
             }
         }
         Long parentId = currentJson.get("parentId").getAsLong();
-        List<CaseTreeNode> parentTree = caseTreeMapper.findTreeByParent(parentId);
+        List<CaseTreeNode> parentTree = caseTreeMapper.findTreeByParent(parentId,UserContext.get().getIsV());
         Boolean isOnly = false;
         if (parentTree.size() <= 1 && parentTree.get(0).getId().equals(id)) {
             isOnly = true;
@@ -146,7 +148,7 @@ public class CaseTreeService {
 
     private String generateTree(Long id, JsonObject jsonObject, Map<Long, JsonArray> map) {
         JsonArray treeJson = new JsonArray();
-        List<CaseTreeNode> treeNodeList = caseTreeMapper.findTreeByParent(id);
+        List<CaseTreeNode> treeNodeList = caseTreeMapper.findTreeByParent(id,UserContext.get().getIsV());
         if (treeNodeList.size() == 0) {
             return null;
         }

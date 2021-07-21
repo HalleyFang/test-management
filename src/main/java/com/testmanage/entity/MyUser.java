@@ -15,4 +15,5 @@ public class MyUser implements Serializable {
     private String password;
     private Set<Roles> roles;
     private Set<Permissions> Permissions;
+    private String isV;
 }

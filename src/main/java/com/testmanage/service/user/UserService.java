@@ -1,4 +1,4 @@
-package com.testmanage.service;
+package com.testmanage.service.user;
 
 import com.testmanage.entity.MyUser;
 import com.testmanage.mapper.UserMapper;

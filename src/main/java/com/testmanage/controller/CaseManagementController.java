@@ -6,6 +6,7 @@ import com.testmanage.entity.CaseInfo;
 import com.testmanage.entity.ExcelCase;
 import com.testmanage.service.CaseBodyToInfo;
 import com.testmanage.service.CaseInfoService;
+import com.testmanage.service.user.UserContext;
 import com.testmanage.utils.ExcelUtils;
 import com.testmanage.utils.JsonParse;
 import com.testmanage.utils.SequenceUtil;
@@ -60,6 +61,9 @@ public class CaseManagementController {
     public HttpServletResponse queryCase(@RequestParam String caseId, HttpServletResponse resp) {
         resp.setHeader("content-type", "application/json;charset=UTF-8");
         CaseInfo caseInfo = caseInfoService.queryCase(caseId);
+        if (caseInfo == null){
+            return null;
+        }
         JsonObject data = JsonParse.StringToJson(JsonParse.getGson().toJson(caseInfo));
         JsonArray jsonArray = JsonParse.getGson().fromJson(caseInfo.getCase_step(),JsonArray.class);
         data.add("case_step",jsonArray);
@@ -92,6 +96,7 @@ public class CaseManagementController {
             for (ExcelCase excelCase : excelCases){
                 CaseInfo caseInfo = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(excelCase),CaseInfo.class);
                 caseInfo = caseBodyToInfo.caseSteps(caseInfo,excelCase.getCase_operate(),excelCase.getCase_expect());
+                caseInfo.setIs_v(UserContext.get().getIsV());
                 if(!caseInfo.getCase_id().isEmpty()) {
                     caseInfosUpdate.add(caseInfo);
                     continue;

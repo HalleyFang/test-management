@@ -12,9 +12,9 @@ public interface CaseTreeMapper {
 
     void updateTree(CaseTreeNode caseTreeNode);
 
-    List<CaseTreeNode> findTree();
+    List<CaseTreeNode> findTree(String is_v);
 
-    List<CaseTreeNode> findTreeByParent(Long parentId);
+    List<CaseTreeNode> findTreeByParent(Long parent_id,String is_v);
 
     CaseTreeNode findTreeById(Long id);
 }

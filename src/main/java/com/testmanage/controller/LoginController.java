@@ -39,6 +39,7 @@ public class LoginController {
                 user.getUsername(),
                 user.getPassword()
         );
+        usernamePasswordToken.setRememberMe(true);
         try {
             //进行验证，这里可以捕获异常，然后返回对应信息
             subject.login(usernamePasswordToken);

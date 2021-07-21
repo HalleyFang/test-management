@@ -3,14 +3,18 @@
 <mapper namespace="com.testmanage.mapper.UserMapper">
 
     <sql id="table">my_user</sql>
+    <sql id="conf">user_conf</sql>
     <insert id="addUser"></insert>
     <update id="updateUser"></update>
     <delete id="deleteUser"></delete>
     <select id="getUserByName" resultType="com.testmanage.entity.MyUser">
-        select * from
-        <include refid="table"></include>
+        select t.*,c.value as isV from
+        <include refid="table"></include> t
+        left join
+        <include refid="conf"></include> c
+        on t.username=c.username
         where
-        username=#{username}
+        t.username=#{username} and c.parameter='isV'
     </select>
     <select id="getAllUser" resultType="com.testmanage.entity.MyUser"></select>
 

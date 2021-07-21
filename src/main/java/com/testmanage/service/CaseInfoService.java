@@ -2,6 +2,8 @@ package com.testmanage.service;
 
 import com.testmanage.entity.CaseInfo;
 import com.testmanage.mapper.CaseInfoMapper;
+import com.testmanage.service.user.UserConfService;
+import com.testmanage.service.user.UserContext;
 import com.testmanage.utils.SequenceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +21,12 @@ public class CaseInfoService {
     @Autowired
     SequenceUtil sequenceUtil;
 
+    @Autowired
+    CaseTreeService caseTreeService;
+
     public void addCase(CaseInfo caseInfo){
         caseInfo.setCase_id(getCaseId());
+        caseInfo.setIs_v(UserContext.get().getIsV());
         caseInfoMapper.insertCase(caseInfo);
     }
 
