@@ -2,12 +2,12 @@ package com.testmanage.service;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.testmanage.entity.CaseTreeNode;
 import com.testmanage.mapper.CaseTreeMapper;
 import com.testmanage.service.user.UserContext;
 import com.testmanage.utils.JsonParse;
+import com.testmanage.utils.SequenceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +24,9 @@ public class CaseTreeService {
 
     @Autowired
     CaseTreeMapper caseTreeMapper;
+
+    @Autowired
+    SequenceUtil sequenceUtil;
 
     @CacheEvict(value = "tree")
     public synchronized void addTree(JsonObject treeJson) throws Exception {
@@ -43,6 +45,46 @@ public class CaseTreeService {
             }
             currentNode.setIs_v(UserContext.get().getIsV());
             caseTreeMapper.addTree(currentNode);
+        }
+
+    }
+
+    @CacheEvict(value = "tree")
+    public synchronized void addTree(Map<String,Object> map) throws Exception {
+        CaseTreeNode node = (CaseTreeNode) map.get("currentNode");
+        Long id = node.getId();
+        if(id == null){
+            node.setId(Long.valueOf(sequenceUtil.getNext("treeId")));
+        }
+        if (!idIsExist(id)) {
+            caseTreeMapper.updateTree(node);
+        } else {
+            Long parentId = (Long) map.get("parentId");
+            if(parentId==null){
+                parentId = 0L;
+            }
+            node.setParent_id(parentId);
+            node.setIs_v(UserContext.get().getIsV());
+            caseTreeMapper.addTree(node);
+            Long preId = (Long) map.get("preId");
+            if(preId!=null){
+                node.setPre_id(preId);
+                CaseTreeNode preNode = new CaseTreeNode();
+                preNode.setId(preId);
+                preNode.setPost_id(id);
+                preNode.setUpdate_user(UserContext.get().getUsername());
+                caseTreeMapper.updateTree(preNode);
+            }
+            Long postId = (Long) map.get("postId");
+            if(postId!=null){
+                node.setPost_id(postId);
+                CaseTreeNode postNode = new CaseTreeNode();
+                postNode.setId(postId);
+                postNode.setPre_id(id);
+                postNode.setUpdate_user(UserContext.get().getUsername());
+                caseTreeMapper.updateTree(postNode);
+            }
+
         }
 
     }
@@ -71,6 +113,7 @@ public class CaseTreeService {
             caseTreeMapper.updateTree(currentNode);            //todo 没变的字段不更新
         }
     }
+
 
     private Map<String, Object> analysisTreeJson(JsonObject treeJson) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
@@ -195,14 +238,24 @@ public class CaseTreeService {
     }
 
 
-    public void analysisRequest(String body) throws Exception {
+    public Map<String, Object> analysisRequest(String body) throws Exception {
+        Map<String,Object> map = new HashMap<>();
         JsonObject bodyJson = JsonParse.StringToJson(body);
+        JsonObject currentNode = bodyJson.getAsJsonObject("data");
+        currentNode.addProperty("is_dir",true);
+        currentNode.addProperty("status",0);
+        CaseTreeNode caseTreeNode = JsonParse.getGson().fromJson(currentNode,CaseTreeNode.class);
+        map.put("currentNode",caseTreeNode);
         JsonObject parentNode = bodyJson.getAsJsonObject("parentNode");
         Long parentId = tmpNode(parentNode);
+        map.put("parentId",parentId);
         JsonObject preNode = bodyJson.getAsJsonObject("preNode");
         Long preId = tmpNode(preNode);
+        map.put("preId",preId);
         JsonObject postNode = bodyJson.getAsJsonObject("postNode");
         Long postId = tmpNode(postNode);
+        map.put("postId",postId);
+        return map;
     }
 
 
@@ -210,12 +263,12 @@ public class CaseTreeService {
         if(jsonObject == null){
             return null;
         }
-        String label = jsonObject.get("label").getAsString();
+        String label = jsonObject.get("label") == null ? null : jsonObject.get("label").getAsString();
         if(label==null){
             return 0L;
         }
         Boolean isDir = jsonObject.get("is_dir").getAsBoolean();
-        String case_id = jsonObject.get("case_id").getAsString();
+        String case_id = jsonObject.get("case_id") == null ? null : jsonObject.get("case_id").getAsString();
         Long id=null;
         if(isDir) {
             id = caseTreeMapper.findNodeByName(label, UserContext.get().getIsV());
@@ -227,9 +280,5 @@ public class CaseTreeService {
         }
         return id;
     }
-
-/*    private CaseTreeNode currentNode(JsonObject jsonObject){
-
-    }*/
 
 }

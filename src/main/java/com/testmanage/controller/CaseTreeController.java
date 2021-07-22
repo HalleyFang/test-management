@@ -1,6 +1,7 @@
 package com.testmanage.controller;
 
 import com.google.gson.JsonObject;
+import com.testmanage.entity.CaseTreeNode;
 import com.testmanage.service.CaseTreeService;
 import com.testmanage.utils.JsonParse;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/tree")
@@ -48,7 +50,7 @@ public class CaseTreeController {
     @RequestMapping(path = "/add", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")
     public void addDir(@RequestBody String body, HttpServletResponse resp) throws Exception {
-        JsonObject bodyJson = JsonParse.StringToJson(body);
-        caseTreeService.addTree(bodyJson);
+        Map<String,Object> map = caseTreeService.analysisRequest(body);
+        caseTreeService.addTree(map);
     }
 }
