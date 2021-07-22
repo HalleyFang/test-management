@@ -1,0 +1,103 @@
+CREATE TABLE "case_info" (
+	"id" BIGINT NULL DEFAULT NULL,
+	"case_id" VARCHAR NULL DEFAULT NULL,
+	"case_name" VARCHAR NULL DEFAULT NULL,
+	"case_pre" VARCHAR NULL DEFAULT NULL,
+	"case_step" VARCHAR NULL DEFAULT NULL,
+	"case_post" VARCHAR NULL DEFAULT NULL,
+	"remark" VARCHAR NULL DEFAULT NULL,
+	"is_delete" BOOLEAN NULL DEFAULT NULL,
+	"is_reviewed" BOOLEAN NULL DEFAULT NULL,
+	"create_user" VARCHAR NULL DEFAULT NULL,
+	"create_time" TIMESTAMP NULL,
+	"update_user" VARCHAR NULL DEFAULT NULL,
+	"update_time" TIMESTAMP NULL,
+	"issue_id" VARCHAR NULL DEFAULT NULL,
+	"is_v" VARCHAR NULL DEFAULT NULL
+)
+;
+COMMENT ON COLUMN "case_info"."id" IS E'';
+COMMENT ON COLUMN "case_info"."case_id" IS E'';
+COMMENT ON COLUMN "case_info"."case_name" IS E'';
+COMMENT ON COLUMN "case_info"."case_pre" IS E'';
+COMMENT ON COLUMN "case_info"."case_step" IS E'';
+COMMENT ON COLUMN "case_info"."case_post" IS E'';
+COMMENT ON COLUMN "case_info"."remark" IS E'';
+COMMENT ON COLUMN "case_info"."is_delete" IS E'';
+COMMENT ON COLUMN "case_info"."is_reviewed" IS E'';
+COMMENT ON COLUMN "case_info"."create_user" IS E'';
+COMMENT ON COLUMN "case_info"."create_time" IS E'';
+COMMENT ON COLUMN "case_info"."update_user" IS E'';
+COMMENT ON COLUMN "case_info"."update_time" IS E'';
+COMMENT ON COLUMN "case_info"."issue_id" IS E'';
+COMMENT ON COLUMN "case_info"."is_v" IS E'';
+
+
+CREATE TABLE "case_tree_node" (
+	"id" BIGINT NULL DEFAULT NULL,
+	"label" VARCHAR NULL DEFAULT NULL,
+	"case_id" VARCHAR NULL DEFAULT NULL,
+	"is_dir" BOOLEAN NOT NULL DEFAULT E'false',
+	"parent_id" BIGINT NULL DEFAULT NULL,
+	"pre_id" BIGINT NULL DEFAULT NULL,
+	"post_id" BIGINT NULL DEFAULT NULL,
+	"is_delete" BOOLEAN NOT NULL DEFAULT E'false',
+	"create_user" VARCHAR NULL DEFAULT NULL,
+	"create_time" TIMESTAMP NULL,
+	"update_user" VARCHAR NULL DEFAULT NULL,
+	"update_time" TIMESTAMP NULL,
+	"status" INTEGER NULL DEFAULT NULL,
+	"is_v" VARCHAR NULL DEFAULT NULL
+)
+;
+COMMENT ON COLUMN "case_tree_node"."id" IS E'';
+COMMENT ON COLUMN "case_tree_node"."label" IS E'';
+COMMENT ON COLUMN "case_tree_node"."case_id" IS E'';
+COMMENT ON COLUMN "case_tree_node"."is_dir" IS E'';
+COMMENT ON COLUMN "case_tree_node"."parent_id" IS E'';
+COMMENT ON COLUMN "case_tree_node"."pre_id" IS E'';
+COMMENT ON COLUMN "case_tree_node"."post_id" IS E'';
+COMMENT ON COLUMN "case_tree_node"."is_delete" IS E'';
+COMMENT ON COLUMN "case_tree_node"."create_user" IS E'';
+COMMENT ON COLUMN "case_tree_node"."create_time" IS E'';
+COMMENT ON COLUMN "case_tree_node"."update_user" IS E'';
+COMMENT ON COLUMN "case_tree_node"."update_time" IS E'';
+COMMENT ON COLUMN "case_tree_node"."status" IS E'';
+COMMENT ON COLUMN "case_tree_node"."is_v" IS E'';
+
+
+CREATE TABLE "my_user" (
+	"id" INTEGER NULL DEFAULT NULL,
+	"username" VARCHAR NULL DEFAULT NULL,
+	"password" VARCHAR NULL DEFAULT NULL,
+	"role" VARCHAR NULL DEFAULT NULL,
+	"permissions" VARCHAR NULL DEFAULT NULL
+)
+;
+COMMENT ON COLUMN "my_user"."id" IS E'';
+COMMENT ON COLUMN "my_user"."username" IS E'';
+COMMENT ON COLUMN "my_user"."password" IS E'';
+COMMENT ON COLUMN "my_user"."role" IS E'';
+COMMENT ON COLUMN "my_user"."permissions" IS E'';
+
+
+
+CREATE TABLE "sequence" (
+	"name" VARCHAR NULL DEFAULT NULL,
+	"id" INTEGER NULL DEFAULT NULL
+)
+;
+COMMENT ON COLUMN "sequence"."name" IS E'';
+COMMENT ON COLUMN "sequence"."id" IS E'';
+
+
+
+CREATE TABLE "user_conf" (
+	"username" VARCHAR NULL DEFAULT NULL,
+	"parameter" VARCHAR NULL DEFAULT NULL,
+	"value" VARCHAR NULL DEFAULT NULL
+)
+;
+COMMENT ON COLUMN "user_conf"."username" IS E'';
+COMMENT ON COLUMN "user_conf"."parameter" IS E'';
+COMMENT ON COLUMN "user_conf"."value" IS E'';
