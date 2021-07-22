@@ -26,6 +26,7 @@ public class UserHandler implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object object) {
+        String path = request.getRequestURI();
         try {
             Subject subject = SecurityUtils.getSubject();
             String username = subject.getPrincipal().toString();
@@ -35,6 +36,7 @@ public class UserHandler implements HandlerInterceptor {
             return Boolean.TRUE;
         } catch (Exception e) {
             log.error("拦截器出错", e);
+            log.error("出错的请求："+path);
             return Boolean.FALSE;
         }
     }

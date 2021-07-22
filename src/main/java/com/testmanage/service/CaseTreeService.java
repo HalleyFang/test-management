@@ -2,6 +2,7 @@ package com.testmanage.service;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.testmanage.entity.CaseTreeNode;
 import com.testmanage.mapper.CaseTreeMapper;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -76,8 +78,8 @@ public class CaseTreeService {
         if (currentJson == null) {
             throw new Exception("node is not invalid");
         }
-        JsonObject preJson = treeJson.get("currentNode").getAsJsonObject();
-        JsonObject postJson = treeJson.get("currentNode").getAsJsonObject();
+        JsonObject preJson = treeJson.get("preNode").getAsJsonObject();
+        JsonObject postJson = treeJson.get("postNode").getAsJsonObject();
         Long preId = -1L;
         Long postId = -1L;
         Long id = currentJson.get("id").getAsLong();
@@ -158,6 +160,9 @@ public class CaseTreeService {
                     //根节点
                     jsonObject = new JsonObject();
                     jsonObject.addProperty("label", node.getLabel());
+                    jsonObject.addProperty("is_dir", true);
+                    jsonObject.addProperty("icon", "el-icon-folder");
+                    jsonObject.addProperty("status", 0);
                     JsonArray j = new JsonArray();
                     jsonObject.add("children", j);
                     map = new HashMap<>();
@@ -166,6 +171,9 @@ public class CaseTreeService {
                     JsonArray jsonArray = map.get(id).getAsJsonArray();
                     JsonObject j2 = new JsonObject();
                     j2.addProperty("label", node.getLabel());
+                    j2.addProperty("is_dir", true);
+                    j2.addProperty("icon", "el-icon-folder");
+                    j2.addProperty("status", 0);
                     JsonArray j = new JsonArray();
                     j2.add("children", j);
                     jsonArray.add(j2);
@@ -176,12 +184,52 @@ public class CaseTreeService {
             if (!node.getIs_dir() && !node.getIs_delete()) {
                 JsonArray jsonArray = map.get(id).getAsJsonArray();
                 String str = JsonParse.getGson().toJson(node);
-                jsonArray.add(JsonParse.StringToJson(str));
+                JsonObject nodeJson = JsonParse.StringToJson(str);
+                nodeJson.addProperty("icon", "el-icon-tickets");
+                jsonArray.add(nodeJson);
             }
             treeJson.add(jsonObject);
         }
 
         return treeJson.toString();
     }
+
+
+    public void analysisRequest(String body) throws Exception {
+        JsonObject bodyJson = JsonParse.StringToJson(body);
+        JsonObject parentNode = bodyJson.getAsJsonObject("parentNode");
+        Long parentId = tmpNode(parentNode);
+        JsonObject preNode = bodyJson.getAsJsonObject("preNode");
+        Long preId = tmpNode(preNode);
+        JsonObject postNode = bodyJson.getAsJsonObject("postNode");
+        Long postId = tmpNode(postNode);
+    }
+
+
+    private Long tmpNode(JsonObject jsonObject) throws Exception {
+        if(jsonObject == null){
+            return null;
+        }
+        String label = jsonObject.get("label").getAsString();
+        if(label==null){
+            return 0L;
+        }
+        Boolean isDir = jsonObject.get("is_dir").getAsBoolean();
+        String case_id = jsonObject.get("case_id").getAsString();
+        Long id=null;
+        if(isDir) {
+            id = caseTreeMapper.findNodeByName(label, UserContext.get().getIsV());
+        }else {
+            id = caseTreeMapper.findNodeByCaseId(case_id);
+        }
+        if(id == null){
+            throw new Exception("树结构非法");
+        }
+        return id;
+    }
+
+/*    private CaseTreeNode currentNode(JsonObject jsonObject){
+
+    }*/
 
 }

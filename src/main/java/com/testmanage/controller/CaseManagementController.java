@@ -6,6 +6,7 @@ import com.testmanage.entity.CaseInfo;
 import com.testmanage.entity.ExcelCase;
 import com.testmanage.service.CaseBodyToInfo;
 import com.testmanage.service.CaseInfoService;
+import com.testmanage.service.CaseTreeService;
 import com.testmanage.service.user.UserContext;
 import com.testmanage.utils.ExcelUtils;
 import com.testmanage.utils.JsonParse;
@@ -35,6 +36,9 @@ public class CaseManagementController {
 
     @Autowired
     SequenceUtil sequenceUtil;
+
+    @Autowired
+    CaseTreeService caseTreeService;
 
     @RequestMapping(path = "/add", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")

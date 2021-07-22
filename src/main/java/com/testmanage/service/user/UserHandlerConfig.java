@@ -13,7 +13,7 @@ public class UserHandlerConfig extends WebMvcConfigurationSupport {
 
     @Override
     protected void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(this.userHandler).excludePathPatterns("/login");
+        registry.addInterceptor(this.userHandler).excludePathPatterns("/login").excludePathPatterns("/error");
         super.addInterceptors(registry);
     }
 

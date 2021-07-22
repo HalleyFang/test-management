@@ -48,6 +48,18 @@
         where
         id=#{id}
     </select>
+    <select id="findNodeByName" resultType="java.lang.Long">
+        select id from
+        <include refid="table"></include>
+        where
+        label=#{label} and is_v=#{is_v}
+    </select>
+    <select id="findNodeByCaseId" resultType="java.lang.Long">
+        select id from
+        <include refid="table"></include>
+        where
+        case_id=#{case_id}
+    </select>
 
 
 </mapper>

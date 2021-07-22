@@ -27,6 +27,9 @@ public class CaseBodyToInfo {
 
     public CaseInfo caseBodyToInfo(String body) throws Exception {
         JsonObject bodyJson = JsonParse.StringToJson(body);
+        if(bodyJson == null){
+            return null;
+        }
         CaseInfo caseInfo = new CaseInfo();
         String case_id = caseInfoService.getCaseId();
         caseInfo.setCase_id(case_id);

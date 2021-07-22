@@ -1,13 +1,13 @@
 package com.testmanage.controller;
 
+import com.google.gson.JsonObject;
 import com.testmanage.service.CaseTreeService;
+import com.testmanage.utils.JsonParse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,5 +43,12 @@ public class CaseTreeController {
             }
         }
         return null;
+    }
+
+    @RequestMapping(path = "/add", method = RequestMethod.POST,
+            produces = "application/json;charset=UTF-8")
+    public void addDir(@RequestBody String body, HttpServletResponse resp) throws Exception {
+        JsonObject bodyJson = JsonParse.StringToJson(body);
+        caseTreeService.addTree(bodyJson);
     }
 }
