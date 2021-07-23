@@ -80,6 +80,11 @@
         where
         case_id=#{case_id}
     </delete>
+    <delete id="deleteCaseById">
+        delete from
+        <include refid="table"></include>
+        where case_id=#{case_id}
+    </delete>
 
     <select id="findByCaseId" resultType="com.testmanage.entity.CaseInfo">
         select * from
@@ -98,5 +103,11 @@
         <include refid="table"/>
         where
         create_user=#{create_user}
+    </select>
+    <select id="findByCaseName" resultType="com.testmanage.entity.CaseInfo">
+        select * from
+        <include refid="table"/>
+        where
+        case_name=#{case_name} and is_v=#{is_v}
     </select>
 </mapper>

@@ -22,4 +22,6 @@ public interface CaseTreeMapper {
 
     Long findNodeByCaseId(String case_id);
 
+    void deleteTreeById(Long id);
+
 }

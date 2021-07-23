@@ -15,8 +15,8 @@ public class CaseInfo implements Serializable {
     private String case_step;
     private String case_post;
     private String remark;
-    private Boolean is_delete;
-    private Boolean is_reviewed;
+    private Boolean is_delete = false;
+    private Boolean is_reviewed = false;
     private String issue_id;
     private String create_user;
     private Date create_time;

@@ -1,15 +1,18 @@
 package com.testmanage.service;
 
 import com.testmanage.entity.CaseInfo;
+import com.testmanage.entity.CaseTreeNode;
 import com.testmanage.mapper.CaseInfoMapper;
 import com.testmanage.service.user.UserConfService;
 import com.testmanage.service.user.UserContext;
+import com.testmanage.utils.JsonParse;
 import com.testmanage.utils.SequenceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -30,6 +33,26 @@ public class CaseInfoService {
         caseInfoMapper.insertCase(caseInfo);
     }
 
+    public synchronized void addCase(Map<String,Object> map) throws Exception {
+        CaseTreeNode node = (CaseTreeNode) map.get("currentNode");
+        String caseId = node.getCase_id();
+        if(caseId!=null){
+            throw new Exception("用例不合法");
+        }
+        caseId = getCaseId();
+        node.setCase_id(caseId);
+        map.put("currentNode",node);
+        caseTreeService.addTree(map);
+        log.info("insert tree label "+node.getLabel());
+        CaseInfo caseInfo = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(node),CaseInfo.class);
+        caseInfo.setCase_id(caseId);
+        caseInfo.setCase_name(node.getLabel());
+        caseInfo.setCase_step("[{\"step\":\"\",\"expect\":\"\"}]");
+        caseInfo.setIs_v(UserContext.get().getIsV());
+        caseInfoMapper.insertCase(caseInfo);
+        log.info("insert case id "+caseId);
+    }
+
     public void addCase(List<CaseInfo> caseInfos){
         caseInfoMapper.insertCaseBach(caseInfos);
     }
@@ -47,8 +70,16 @@ public class CaseInfoService {
         caseInfoMapper.deleteCase(caseInfo);
     }
 
+    public void deleteCase(String caseId){
+        caseInfoMapper.deleteCaseById(caseId);
+    }
+
     public CaseInfo queryCase(String caseId){
         return caseInfoMapper.findByCaseId(caseId);
+    }
+
+    public CaseInfo queryCaseByName(String caseName){
+        return caseInfoMapper.findByCaseName(caseName,UserContext.get().getIsV());
     }
 
     public String getCaseId() {

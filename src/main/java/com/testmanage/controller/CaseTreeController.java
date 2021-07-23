@@ -50,7 +50,19 @@ public class CaseTreeController {
     @RequestMapping(path = "/add", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")
     public void addDir(@RequestBody String body, HttpServletResponse resp) throws Exception {
-        Map<String,Object> map = caseTreeService.analysisRequest(body);
+        Map<String,Object> map = caseTreeService.analysisRequest(body,"tree");
         caseTreeService.addTree(map);
+    }
+
+    @RequestMapping(path = "/update", method = RequestMethod.POST,
+            produces = "application/json;charset=UTF-8")
+    public void updateNode(@RequestBody String body, HttpServletResponse resp) throws Exception {
+//        caseTreeService.updateTree();
+    }
+
+    @RequestMapping(path = "/delete", method = RequestMethod.POST,
+            produces = "application/json;charset=UTF-8")
+    public void deleteDir(@RequestParam Long id, HttpServletResponse resp) throws Exception {
+        caseTreeService.deleteTree(id);
     }
 }

@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/case")
@@ -43,7 +44,9 @@ public class CaseManagementController {
     @RequestMapping(path = "/add", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")
     public void addCase(@RequestBody String body, HttpServletResponse resp) throws Exception {
-        caseInfoService.addCase(caseBodyToInfo.caseBodyToInfo(body));
+        Map<String,Object> map = caseTreeService.analysisRequest(body,"case");
+        caseInfoService.addCase(map);
+//        caseInfoService.addCase(caseBodyToInfo.caseBodyToInfo(body));
     }
 
     @RequestMapping(path = "/update", method = RequestMethod.POST,
@@ -57,11 +60,12 @@ public class CaseManagementController {
 
     @RequestMapping(path = "/delete", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")
-    public void deleteCase(@RequestBody String body, HttpServletResponse resp) throws Exception {
-        caseInfoService.deleteCase(caseBodyToInfo.caseBodyToInfo(body));
+    public void deleteCase(@RequestParam String caseId, HttpServletResponse resp) throws Exception {
+        caseInfoService.deleteCase(caseId);
+        caseTreeService.deleteTree(caseId);
     }
 
-    @RequestMapping(path = "/query", method = RequestMethod.POST)
+    @RequestMapping(path = "/queryById", method = RequestMethod.POST)
     public HttpServletResponse queryCase(@RequestParam String caseId, HttpServletResponse resp) {
         resp.setHeader("content-type", "application/json;charset=UTF-8");
         CaseInfo caseInfo = caseInfoService.queryCase(caseId);
@@ -88,6 +92,32 @@ public class CaseManagementController {
         return null;
     }
 
+    @RequestMapping(path = "/queryByName", method = RequestMethod.POST)
+    public HttpServletResponse queryCaseByName(@RequestParam String caseName, HttpServletResponse resp) {
+        resp.setHeader("content-type", "application/json;charset=UTF-8");
+        CaseInfo caseInfo = caseInfoService.queryCaseByName(caseName);
+        if (caseInfo == null){
+            return null;
+        }
+        JsonObject data = JsonParse.StringToJson(JsonParse.getGson().toJson(caseInfo));
+        JsonArray jsonArray = JsonParse.getGson().fromJson(caseInfo.getCase_step(),JsonArray.class);
+        data.add("case_step",jsonArray);
+        OutputStream outputStream = null;
+        try {
+            outputStream = resp.getOutputStream();
+            byte[] dataByteArr = data.toString().getBytes("UTF-8");
+            outputStream.write(dataByteArr);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                outputStream.close();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
 
     @RequestMapping(path = "/importExcel", method = RequestMethod.POST)
     public void importExcel(@RequestBody MultipartFile file){

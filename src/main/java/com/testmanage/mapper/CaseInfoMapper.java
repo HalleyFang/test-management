@@ -18,7 +18,12 @@ public interface CaseInfoMapper {
 
     void deleteCase(CaseInfo info);
 
-    CaseInfo findByCaseId(String caseId);
+    void deleteCaseById(String case_id);
+
+
+    CaseInfo findByCaseId(String case_id);
+
+    CaseInfo findByCaseName(String case_name,String is_v);
 
     List<CaseInfo> findAll();
 

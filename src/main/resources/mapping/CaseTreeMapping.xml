@@ -7,8 +7,8 @@
         insert into
         <include refid="table"></include>
         values
-        (#{id},#{label},#{case_id},#{is_dir},#{parent_id},#{post_id},#{is_delete},#{create_user},
-        #{create_time,jdbcType=TIMESTAMP},null,null,#{status},#{is_v})
+        (#{id},#{label},#{case_id},#{is_dir},#{parent_id},#{pre_id},#{post_id},#{is_delete},#{create_user},
+        #{create_time,jdbcType=TIMESTAMP},#{update_user,jdbcType=NULL},#{update_time,jdbcType=NULL},#{status},#{is_v})
     </insert>
     <update id="updateTree">
         update
@@ -33,6 +33,12 @@
         where
         id=#{id}
     </update>
+    <delete id="deleteTreeById">
+        delete from
+        <include refid="table"></include>
+        where
+        id=#{id}
+    </delete>
     <select id="findTree" resultType="com.testmanage.entity.CaseTreeNode">
         select * from
         <include refid="table"></include>

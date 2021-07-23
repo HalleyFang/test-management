@@ -2,6 +2,7 @@ package com.testmanage.service;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.testmanage.entity.CaseTreeNode;
 import com.testmanage.mapper.CaseTreeMapper;
@@ -50,24 +51,30 @@ public class CaseTreeService {
     }
 
     @CacheEvict(value = "tree")
-    public synchronized void addTree(Map<String,Object> map) throws Exception {
+    public synchronized void addTree(Map<String, Object> map) throws Exception {
         CaseTreeNode node = (CaseTreeNode) map.get("currentNode");
         Long id = node.getId();
-        if(id == null){
-            node.setId(Long.valueOf(sequenceUtil.getNext("treeId")));
+        if (id == null) {
+            id = Long.valueOf(sequenceUtil.getNext("treeId"));
+            node.setId(id);
         }
-        if (!idIsExist(id)) {
+        if (idIsExist(id)) {
             caseTreeMapper.updateTree(node);
         } else {
+            String label = node.getLabel();
+            Long labelId = caseTreeMapper.findNodeByName(label,UserContext.get().getIsV());
+            if(labelId instanceof Long){
+                throw new Exception("名称不能重复");
+            }
             Long parentId = (Long) map.get("parentId");
-            if(parentId==null){
+            if (parentId == null) {
                 parentId = 0L;
             }
             node.setParent_id(parentId);
             node.setIs_v(UserContext.get().getIsV());
             caseTreeMapper.addTree(node);
             Long preId = (Long) map.get("preId");
-            if(preId!=null){
+            if (preId != null) {
                 node.setPre_id(preId);
                 CaseTreeNode preNode = new CaseTreeNode();
                 preNode.setId(preId);
@@ -76,7 +83,7 @@ public class CaseTreeService {
                 caseTreeMapper.updateTree(preNode);
             }
             Long postId = (Long) map.get("postId");
-            if(postId!=null){
+            if (postId != null) {
                 node.setPost_id(postId);
                 CaseTreeNode postNode = new CaseTreeNode();
                 postNode.setId(postId);
@@ -87,6 +94,34 @@ public class CaseTreeService {
 
         }
 
+    }
+
+    @CacheEvict(value = "tree")
+    public synchronized void deleteTree(Long id){
+        CaseTreeNode currentNode = caseTreeMapper.findTreeById(id);
+        if(currentNode!=null) {
+            Long preId = currentNode.getPre_id();
+            Long postId = currentNode.getPost_id();
+            if (preId != null) {
+                CaseTreeNode caseTreeNode = new CaseTreeNode();
+                caseTreeNode.setId(preId);
+                caseTreeNode.setPost_id(postId);
+                caseTreeMapper.updateTree(caseTreeNode);
+            }
+            if (postId != null) {
+                CaseTreeNode caseTreeNode = new CaseTreeNode();
+                caseTreeNode.setId(postId);
+                caseTreeNode.setPre_id(preId);
+                caseTreeMapper.updateTree(caseTreeNode);
+            }
+            caseTreeMapper.deleteTreeById(id);
+        }
+    }
+
+    @CacheEvict(value = "tree")
+    public synchronized void deleteTree(String caseId){
+        Long id = caseTreeMapper.findNodeByCaseId(caseId);
+        deleteTree(id);
     }
 
     @CacheEvict(value = "tree")
@@ -139,7 +174,7 @@ public class CaseTreeService {
             }
         }
         Long parentId = currentJson.get("parentId").getAsLong();
-        List<CaseTreeNode> parentTree = caseTreeMapper.findTreeByParent(parentId,UserContext.get().getIsV());
+        List<CaseTreeNode> parentTree = caseTreeMapper.findTreeByParent(parentId, UserContext.get().getIsV());
         Boolean isOnly = false;
         if (parentTree.size() <= 1 && parentTree.get(0).getId().equals(id)) {
             isOnly = true;
@@ -191,17 +226,19 @@ public class CaseTreeService {
     }
 
 
-    private String generateTree(Long id, JsonObject jsonObject, Map<Long, JsonArray> map) {
+    //todo 排序
+    private String generateTree(Long parentId, JsonObject jsonObject, Map<Long, JsonArray> map) {
         JsonArray treeJson = new JsonArray();
-        List<CaseTreeNode> treeNodeList = caseTreeMapper.findTreeByParent(id,UserContext.get().getIsV());
+        List<CaseTreeNode> treeNodeList = caseTreeMapper.findTreeByParent(parentId, UserContext.get().getIsV());
         if (treeNodeList.size() == 0) {
             return null;
         }
         for (CaseTreeNode node : treeNodeList) {
             if (node.getIs_dir() && !node.getIs_delete()) {
-                if (id == 0) {
+                if (parentId == 0) {
                     //根节点
                     jsonObject = new JsonObject();
+                    jsonObject.addProperty("id", node.getId());
                     jsonObject.addProperty("label", node.getLabel());
                     jsonObject.addProperty("is_dir", true);
                     jsonObject.addProperty("icon", "el-icon-folder");
@@ -211,8 +248,9 @@ public class CaseTreeService {
                     map = new HashMap<>();
                     map.put(node.getId(), j);
                 } else {
-                    JsonArray jsonArray = map.get(id).getAsJsonArray();
+                    JsonArray jsonArray = map.get(parentId).getAsJsonArray();
                     JsonObject j2 = new JsonObject();
+                    j2.addProperty("id", node.getId());
                     j2.addProperty("label", node.getLabel());
                     j2.addProperty("is_dir", true);
                     j2.addProperty("icon", "el-icon-folder");
@@ -225,7 +263,7 @@ public class CaseTreeService {
                 generateTree(node.getId(), jsonObject, map);
             }
             if (!node.getIs_dir() && !node.getIs_delete()) {
-                JsonArray jsonArray = map.get(id).getAsJsonArray();
+                JsonArray jsonArray = map.get(parentId).getAsJsonArray();
                 String str = JsonParse.getGson().toJson(node);
                 JsonObject nodeJson = JsonParse.StringToJson(str);
                 nodeJson.addProperty("icon", "el-icon-tickets");
@@ -238,44 +276,52 @@ public class CaseTreeService {
     }
 
 
-    public Map<String, Object> analysisRequest(String body) throws Exception {
-        Map<String,Object> map = new HashMap<>();
+    public Map<String, Object> analysisRequest(String body, String type) throws Exception {
+        Map<String, Object> map = new HashMap<>();
         JsonObject bodyJson = JsonParse.StringToJson(body);
         JsonObject currentNode = bodyJson.getAsJsonObject("data");
-        currentNode.addProperty("is_dir",true);
-        currentNode.addProperty("status",0);
-        CaseTreeNode caseTreeNode = JsonParse.getGson().fromJson(currentNode,CaseTreeNode.class);
-        map.put("currentNode",caseTreeNode);
+        if (type.equalsIgnoreCase("tree")) {
+            currentNode.addProperty("is_dir", true);
+            currentNode.addProperty("status", 0);
+        } else if (type.equalsIgnoreCase("case")) {
+            currentNode.addProperty("is_dir", false);
+            currentNode.addProperty("status", -1);
+        }
+        CaseTreeNode caseTreeNode = JsonParse.getGson().fromJson(currentNode, CaseTreeNode.class);
+        map.put("currentNode", caseTreeNode);
         JsonObject parentNode = bodyJson.getAsJsonObject("parentNode");
         Long parentId = tmpNode(parentNode);
-        map.put("parentId",parentId);
-        JsonObject preNode = bodyJson.getAsJsonObject("preNode");
+        map.put("parentId", parentId);
+        JsonObject preNode = bodyJson.get("preNode") instanceof JsonNull ? null : bodyJson.getAsJsonObject("preNode");
         Long preId = tmpNode(preNode);
-        map.put("preId",preId);
-        JsonObject postNode = bodyJson.getAsJsonObject("postNode");
+        map.put("preId", preId);
+        JsonObject postNode = bodyJson.get("postNode") instanceof JsonNull ? null : bodyJson.getAsJsonObject("postNode");
         Long postId = tmpNode(postNode);
-        map.put("postId",postId);
+        map.put("postId", postId);
         return map;
     }
 
 
     private Long tmpNode(JsonObject jsonObject) throws Exception {
-        if(jsonObject == null){
+        if (jsonObject == null) {
             return null;
         }
-        String label = jsonObject.get("label") == null ? null : jsonObject.get("label").getAsString();
-        if(label==null){
+        String label = jsonObject.get("label") instanceof JsonNull || jsonObject.get("label") == null
+                ? null : jsonObject.get("label").getAsString();
+        if (label == null) {
             return 0L;
         }
-        Boolean isDir = jsonObject.get("is_dir").getAsBoolean();
-        String case_id = jsonObject.get("case_id") == null ? null : jsonObject.get("case_id").getAsString();
-        Long id=null;
-        if(isDir) {
+        Boolean isDir = jsonObject.get("is_dir") instanceof JsonNull || jsonObject.get("is_dir") == null
+                ? true : jsonObject.get("is_dir").getAsBoolean();
+        String case_id = jsonObject.get("case_id") instanceof JsonNull || jsonObject.get("case_id") == null
+                ? null : jsonObject.get("case_id").getAsString();
+        Long id = null;
+        if (isDir) {
             id = caseTreeMapper.findNodeByName(label, UserContext.get().getIsV());
-        }else {
+        } else {
             id = caseTreeMapper.findNodeByCaseId(case_id);
         }
-        if(id == null){
+        if (id == null) {
             throw new Exception("树结构非法");
         }
         return id;
