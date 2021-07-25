@@ -38,7 +38,7 @@ public class UserController {
                 ImageIO.write(image, "png", os);
             }
         } catch (IOException e) {
-            log.error("获取图片异常:{}",e.getMessage());
+            log.error("获取图片异常:{}", e.getMessage());
         } finally {
             if (os != null) {
                 os.flush();
@@ -55,7 +55,7 @@ public class UserController {
 
     @PostMapping("/userConf/setV")
     public boolean setV(@RequestParam String value) {
-        userConfService.setV(UserContext.get().getUsername(),value);
+        userConfService.setV(UserContext.get().getUsername(), value);
         return true;
     }
 }

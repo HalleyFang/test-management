@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.testmanage.mapper.TaskMapper">
+
+    <sql id="table">tasks</sql>
+    <insert id="addTask">
+        insert into
+        <include refid="table"></include>
+        (id,label,status,executor,start_date,end_date,create_user,create_time,is_v)
+        values
+        (#{id},#{label},#{status},#{executor},#{start_date,jdbcType=DATE},
+        #{end_date,jdbcType=DATE},#{create_user},#{create_time,jdbcType=TIMESTAMP},#{is_v})
+    </insert>
+    <update id="updateTaskById"></update>
+    <delete id="deleteTaskById"></delete>
+    <select id="findAllTask" resultType="com.testmanage.entity.Task">
+        select * from
+        <include refid="table"></include>
+    </select>
+    <select id="findTaskById" resultType="com.testmanage.entity.Task">
+        select * from
+        <include refid="table"></include>
+        where
+        id=#{id}
+    </select>
+    <select id="findTaskByLabel" resultType="com.testmanage.entity.Task">
+        select * from
+        <include refid="table"></include>
+        where
+        label=#{label}
+    </select>
+
+
+</mapper>

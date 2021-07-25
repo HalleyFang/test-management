@@ -73,7 +73,7 @@ public class ShiroConfig {
     }
 
     @Bean
-    public CORSAuthenticationFilter corsAuthenticationFilter(){
+    public CORSAuthenticationFilter corsAuthenticationFilter() {
         return new CORSAuthenticationFilter();
     }
 

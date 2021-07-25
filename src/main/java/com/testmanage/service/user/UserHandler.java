@@ -21,6 +21,7 @@ public class UserHandler implements HandlerInterceptor {
 
     @Autowired
     UserConfService userConfService;
+
     /**
      * 在请求处理之前进行调用（Controller方法调用之前）
      */
@@ -36,7 +37,7 @@ public class UserHandler implements HandlerInterceptor {
             return Boolean.TRUE;
         } catch (Exception e) {
             log.error("拦截器出错", e);
-            log.error("出错的请求："+path);
+            log.error("出错的请求：" + path);
             return Boolean.FALSE;
         }
     }

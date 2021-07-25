@@ -62,8 +62,8 @@ public class CaseTreeService {
             caseTreeMapper.updateTree(node);
         } else {
             String label = node.getLabel();
-            Long labelId = caseTreeMapper.findNodeByName(label,UserContext.get().getIsV());
-            if(labelId instanceof Long){
+            Long labelId = caseTreeMapper.findNodeByName(label, UserContext.get().getIsV());
+            if (labelId instanceof Long) {
                 throw new Exception("名称不能重复");
             }
             Long parentId = (Long) map.get("parentId");
@@ -97,9 +97,9 @@ public class CaseTreeService {
     }
 
     @CacheEvict(value = "tree")
-    public synchronized void deleteTree(Long id){
+    public synchronized void deleteTree(Long id) {
         CaseTreeNode currentNode = caseTreeMapper.findTreeById(id);
-        if(currentNode!=null) {
+        if (currentNode != null) {
             Long preId = currentNode.getPre_id();
             Long postId = currentNode.getPost_id();
             if (preId != null) {
@@ -119,7 +119,7 @@ public class CaseTreeService {
     }
 
     @CacheEvict(value = "tree")
-    public synchronized void deleteTree(String caseId){
+    public synchronized void deleteTree(String caseId) {
         Long id = caseTreeMapper.findNodeByCaseId(caseId);
         deleteTree(id);
     }

@@ -36,7 +36,7 @@ public class ExcelUtils<T> {
         try {
             HSSFWorkbook workbook = new HSSFWorkbook(input);
             HSSFSheet sheet = workbook.getSheetAt(0);
-            if(sheetName!=null && !sheetName.isEmpty()) {
+            if (sheetName != null && !sheetName.isEmpty()) {
                 sheet = workbook.getSheet(sheetName);
             }
             int rows = sheet.getPhysicalNumberOfRows();
@@ -54,14 +54,14 @@ public class ExcelUtils<T> {
                 }
                 List<String> head = new ArrayList<>();
                 HSSFRow row0 = sheet.getRow(0);
-                for (int k=0;k<20;k++){
+                for (int k = 0; k < 20; k++) {
                     HSSFCell cell = row0.getCell(k);
-                    if (cell == null){
+                    if (cell == null) {
                         break;
                     }
                     head.add(cell.getStringCellValue());
                 }
-                if (head.size()==0){
+                if (head.size() == 0) {
                     return null;
                 }
                 for (int i = 1; i < rows; i++) {// 从第2行开始取数据,默认第一行是表头.

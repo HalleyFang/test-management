@@ -44,7 +44,7 @@ public class CaseManagementController {
     @RequestMapping(path = "/add", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")
     public void addCase(@RequestBody String body, HttpServletResponse resp) throws Exception {
-        Map<String,Object> map = caseTreeService.analysisRequest(body,"case");
+        Map<String, Object> map = caseTreeService.analysisRequest(body, "case");
         caseInfoService.addCase(map);
 //        caseInfoService.addCase(caseBodyToInfo.caseBodyToInfo(body));
     }
@@ -53,8 +53,8 @@ public class CaseManagementController {
             produces = "application/json;charset=UTF-8")
     public void updateCase(@RequestBody String body, HttpServletResponse resp) throws Exception {
         JsonObject jsonObject = JsonParse.StringToJson(body);
-        jsonObject.addProperty("case_step",jsonObject.get("case_step").getAsJsonArray().toString());
-        CaseInfo caseInfo = JsonParse.getGson().fromJson(jsonObject,CaseInfo.class);
+        jsonObject.addProperty("case_step", jsonObject.get("case_step").getAsJsonArray().toString());
+        CaseInfo caseInfo = JsonParse.getGson().fromJson(jsonObject, CaseInfo.class);
         caseInfoService.updateCase(caseInfo);
     }
 
@@ -69,12 +69,12 @@ public class CaseManagementController {
     public HttpServletResponse queryCase(@RequestParam String caseId, HttpServletResponse resp) {
         resp.setHeader("content-type", "application/json;charset=UTF-8");
         CaseInfo caseInfo = caseInfoService.queryCase(caseId);
-        if (caseInfo == null){
+        if (caseInfo == null) {
             return null;
         }
         JsonObject data = JsonParse.StringToJson(JsonParse.getGson().toJson(caseInfo));
-        JsonArray jsonArray = JsonParse.getGson().fromJson(caseInfo.getCase_step(),JsonArray.class);
-        data.add("case_step",jsonArray);
+        JsonArray jsonArray = JsonParse.getGson().fromJson(caseInfo.getCase_step(), JsonArray.class);
+        data.add("case_step", jsonArray);
         OutputStream outputStream = null;
         try {
             outputStream = resp.getOutputStream();
@@ -82,10 +82,10 @@ public class CaseManagementController {
             outputStream.write(dataByteArr);
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 outputStream.close();
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -96,12 +96,12 @@ public class CaseManagementController {
     public HttpServletResponse queryCaseByName(@RequestParam String caseName, HttpServletResponse resp) {
         resp.setHeader("content-type", "application/json;charset=UTF-8");
         CaseInfo caseInfo = caseInfoService.queryCaseByName(caseName);
-        if (caseInfo == null){
+        if (caseInfo == null) {
             return null;
         }
         JsonObject data = JsonParse.StringToJson(JsonParse.getGson().toJson(caseInfo));
-        JsonArray jsonArray = JsonParse.getGson().fromJson(caseInfo.getCase_step(),JsonArray.class);
-        data.add("case_step",jsonArray);
+        JsonArray jsonArray = JsonParse.getGson().fromJson(caseInfo.getCase_step(), JsonArray.class);
+        data.add("case_step", jsonArray);
         OutputStream outputStream = null;
         try {
             outputStream = resp.getOutputStream();
@@ -109,10 +109,10 @@ public class CaseManagementController {
             outputStream.write(dataByteArr);
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 outputStream.close();
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -120,18 +120,18 @@ public class CaseManagementController {
     }
 
     @RequestMapping(path = "/importExcel", method = RequestMethod.POST)
-    public void importExcel(@RequestBody MultipartFile file){
+    public void importExcel(@RequestBody MultipartFile file) {
         try {
             InputStream inputStream = file.getInputStream();
             ExcelUtils<ExcelCase> excelUtil = new ExcelUtils<>(ExcelCase.class);
             List<ExcelCase> excelCases = excelUtil.importExcel(null, inputStream);
             List<CaseInfo> caseInfosInsert = new ArrayList<>();
             List<CaseInfo> caseInfosUpdate = new ArrayList<>();
-            for (ExcelCase excelCase : excelCases){
-                CaseInfo caseInfo = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(excelCase),CaseInfo.class);
-                caseInfo = caseBodyToInfo.caseSteps(caseInfo,excelCase.getCase_operate(),excelCase.getCase_expect());
+            for (ExcelCase excelCase : excelCases) {
+                CaseInfo caseInfo = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(excelCase), CaseInfo.class);
+                caseInfo = caseBodyToInfo.caseSteps(caseInfo, excelCase.getCase_operate(), excelCase.getCase_expect());
                 caseInfo.setIs_v(UserContext.get().getIsV());
-                if(!caseInfo.getCase_id().isEmpty()) {
+                if (!caseInfo.getCase_id().isEmpty()) {
                     caseInfosUpdate.add(caseInfo);
                     continue;
                 }

@@ -27,7 +27,7 @@ public class CaseBodyToInfo {
 
     public CaseInfo caseBodyToInfo(String body) throws Exception {
         JsonObject bodyJson = JsonParse.StringToJson(body);
-        if(bodyJson == null){
+        if (bodyJson == null) {
             return null;
         }
         CaseInfo caseInfo = new CaseInfo();
@@ -56,45 +56,45 @@ public class CaseBodyToInfo {
     }
 
 
-    public CaseInfo caseSteps(CaseInfo caseInfo,String operate,String expect) throws Exception {
+    public CaseInfo caseSteps(CaseInfo caseInfo, String operate, String expect) throws Exception {
         Map<Integer, String> opMap = opStr(operate);
         Map<Integer, String> expMap = opStr(expect);
-        if(expMap.size()>opMap.size()){
+        if (expMap.size() > opMap.size()) {
             throw new Exception("预期结果多于步骤，解析失败");
         }
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append("[");
-        for(Map.Entry<Integer, String> entry:opMap.entrySet()){
+        for (Map.Entry<Integer, String> entry : opMap.entrySet()) {
             stringBuffer.append("{\"").append(entry.getValue()).append("\":\"");
-            if(expMap.get(entry.getKey()).isEmpty()){
+            if (expMap.get(entry.getKey()).isEmpty()) {
                 stringBuffer.append(expMap.get(entry.getKey()));
             }
             stringBuffer.append("\"},");
         }
-        stringBuffer.substring(0,stringBuffer.length()-1);
+        stringBuffer.substring(0, stringBuffer.length() - 1);
         stringBuffer.append("]");
         caseInfo.setCase_step(stringBuffer.toString());
         return caseInfo;
     }
 
 
-    private Map<Integer, String> opStr(String str){
+    private Map<Integer, String> opStr(String str) {
         String[] strings = str.split("\n");
         List<String> list = new ArrayList<>();
-        for(String s : strings){
-            if(s.matches("^[0-9]+[.]")){
+        for (String s : strings) {
+            if (s.matches("^[0-9]+[.]")) {
                 list.add(s);
-            }else {
-                String t = list.get(list.size()-1);
+            } else {
+                String t = list.get(list.size() - 1);
                 t = t + "\n" + s;
-                list.remove(list.size()-1);
+                list.remove(list.size() - 1);
                 list.add(t);
             }
         }
-        Map<Integer,String> map = new LinkedHashMap<>();
-        for (String ss : list){
+        Map<Integer, String> map = new LinkedHashMap<>();
+        for (String ss : list) {
             int index = ss.indexOf(".");
-            map.put(Integer.valueOf(ss.substring(0,index)),ss.substring(index+1));
+            map.put(Integer.valueOf(ss.substring(0, index)), ss.substring(index + 1));
         }
         return map;
     }

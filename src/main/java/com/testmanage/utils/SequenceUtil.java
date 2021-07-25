@@ -16,7 +16,7 @@ public class SequenceUtil {
         if (id <= 0) {
             id = 1;
         }
-        caseIdSequenceMapper.update(name,id + 1);
+        caseIdSequenceMapper.update(name, id + 1);
         return id;
     }
 }

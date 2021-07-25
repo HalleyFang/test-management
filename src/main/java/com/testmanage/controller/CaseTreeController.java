@@ -22,12 +22,12 @@ public class CaseTreeController {
     @Autowired
     CaseTreeService caseTreeService;
 
-    @RequestMapping( method = RequestMethod.GET,
+    @RequestMapping(method = RequestMethod.GET,
             produces = "application/json;charset=UTF-8")
-    public HttpServletResponse getTree(HttpServletResponse resp){
+    public HttpServletResponse getTree(HttpServletResponse resp) {
         resp.setHeader("content-type", "application/json;charset=UTF-8");
-        String data=caseTreeService.getTree();
-        if(data == null || data.isEmpty()){
+        String data = caseTreeService.getTree();
+        if (data == null || data.isEmpty()) {
             return null;
         }
         OutputStream outputStream = null;
@@ -37,10 +37,10 @@ public class CaseTreeController {
             outputStream.write(dataByteArr);
         } catch (IOException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 outputStream.close();
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -50,7 +50,7 @@ public class CaseTreeController {
     @RequestMapping(path = "/add", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")
     public void addDir(@RequestBody String body, HttpServletResponse resp) throws Exception {
-        Map<String,Object> map = caseTreeService.analysisRequest(body,"tree");
+        Map<String, Object> map = caseTreeService.analysisRequest(body, "tree");
         caseTreeService.addTree(map);
     }
 
