@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.testmanage.mapper.TaskCaseMapper">
+    <sql id="table">task_case</sql>
+    <insert id="addCase">
+        insert into
+        <include refid="table"></include>
+        (task_id,case_id,case_status,tree_id)
+        values
+        (#{task_id},#{case_id},#{case_status},#{tree_id})
+    </insert>
+    <update id="updateCase">
+        update
+        <include refid="table"></include>
+        set
+        status=#{status},
+        update_user=#{update_user},update_time=#{update_time,jdbcType=TIMESTAMP}
+        where
+        task_id=#{task_id} and case_id=#{case_id}
+    </update>
+    <delete id="deleteCase">
+        delete from
+        <include refid="table"></include>
+        where
+        task_id=#{task_id} and case_id=#{case_id}
+    </delete>
+    <select id="findByTaskId" resultType="com.testmanage.entity.TaskCase">
+        select * from
+        <include refid="table"></include>
+        where
+        task_id=#{task_id}
+    </select>
+    <select id="findById" resultType="com.testmanage.entity.TaskCase">
+        select * from
+        <include refid="table"></include>
+        where
+        task_id=#{task_id} and case_id=#{case_id}
+    </select>
+
+</mapper>

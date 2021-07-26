@@ -10,7 +10,7 @@ public interface TaskMapper {
 
     void addTask(Task task);
 
-    Task updateTaskById(Long id);
+    void updateTaskById(Task task);
 
     void deleteTaskById(Long id);
 

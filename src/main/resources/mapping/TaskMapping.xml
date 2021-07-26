@@ -11,8 +11,35 @@
         (#{id},#{label},#{status},#{executor},#{start_date,jdbcType=DATE},
         #{end_date,jdbcType=DATE},#{create_user},#{create_time,jdbcType=TIMESTAMP},#{is_v})
     </insert>
-    <update id="updateTaskById"></update>
-    <delete id="deleteTaskById"></delete>
+    <update id="updateTaskById">
+        update
+        <include refid="table"/>
+        set
+        <if test="label != null and label != ''">
+            label=#{label},
+        </if>
+        <if test="status != null and status != ''">
+            status=#{status},
+        </if>
+        <if test="executor != null and executor != ''">
+            executor=#{executor},
+        </if>
+        <if test="start_date != null and start_date != ''">
+            start_date=#{start_date},
+        </if>
+        <if test="end_date != null and end_date != ''">
+            end_date=#{end_date},
+        </if>
+        update_user=#{update_user},update_time=#{update_time,jdbcType=TIMESTAMP}
+        where
+        id=#{id}
+    </update>
+    <delete id="deleteTaskById">
+        delete from
+        <include refid="table"></include>
+        where
+        id=#{id}
+    </delete>
     <select id="findAllTask" resultType="com.testmanage.entity.Task">
         select * from
         <include refid="table"></include>

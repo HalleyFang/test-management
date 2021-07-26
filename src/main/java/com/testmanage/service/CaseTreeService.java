@@ -327,4 +327,8 @@ public class CaseTreeService {
         return id;
     }
 
+    public CaseTreeNode getTreeById(Long id){
+        return caseTreeMapper.findTreeById(id);
+    }
+
 }

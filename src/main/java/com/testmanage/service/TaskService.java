@@ -29,8 +29,13 @@ public class TaskService {
     }
 
     @CacheEvict("tasks")
-    public void updateTask(){
+    public void updateTask(Task task){
+        taskMapper.updateTaskById(task);
+    }
 
+    @CacheEvict("tasks")
+    public void deleteTask(Long id){
+        taskMapper.deleteTaskById(id);
     }
 
     @Cacheable("tasks")
