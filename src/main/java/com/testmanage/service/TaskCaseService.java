@@ -31,6 +31,10 @@ public class TaskCaseService {
         }
     }
 
+    public TaskCase query(Long taskId, String caseId){
+        return taskCaseMapper.findById(taskId,caseId);
+    }
+
     public void refreshCase(Map<Long,String> caseIdMap,Long taskId){
         for (Map.Entry entry:caseIdMap.entrySet()){
             TaskCase taskCase = new TaskCase();

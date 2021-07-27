@@ -14,9 +14,9 @@ public interface TaskMapper {
 
     void deleteTaskById(Long id);
 
-    List<Task> findAllTask();
+    List<Task> findAllTask(String is_v);
 
     Task findTaskById(Long id);
 
-    Task findTaskByLabel(String label);
+    Task findTaskByLabel(String label,String is_v);
 }

@@ -43,6 +43,8 @@
     <select id="findAllTask" resultType="com.testmanage.entity.Task">
         select * from
         <include refid="table"></include>
+        where
+        is_v=#{is_v}
     </select>
     <select id="findTaskById" resultType="com.testmanage.entity.Task">
         select * from
@@ -54,7 +56,7 @@
         select * from
         <include refid="table"></include>
         where
-        label=#{label}
+        label=#{label} and is_v=#{is_v}
     </select>
 
 

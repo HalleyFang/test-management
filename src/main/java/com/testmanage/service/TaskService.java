@@ -2,6 +2,7 @@ package com.testmanage.service;
 
 import com.testmanage.entity.Task;
 import com.testmanage.mapper.TaskMapper;
+import com.testmanage.mapper.UserConfMapper;
 import com.testmanage.service.user.UserContext;
 import javafx.scene.input.DataFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +40,8 @@ public class TaskService {
     }
 
     @Cacheable("tasks")
-    public List<Task> findAllTask(){
-        return taskMapper.findAllTask();
+    public List<Task> findAllTask(){ ;
+        return taskMapper.findAllTask(UserContext.get().getIsV());
     }
 
     public Task findTaskById(Long id){
@@ -48,7 +49,7 @@ public class TaskService {
     }
 
     public Task findTaskByLabel(String label){
-        return taskMapper.findTaskByLabel(label);
+        return taskMapper.findTaskByLabel(label,UserContext.get().getIsV());
     }
 
     public List<Task> findTaskPage(Integer page){

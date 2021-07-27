@@ -1,21 +1,15 @@
 package com.testmanage.controller;
 
-import com.google.gson.JsonObject;
-import com.testmanage.entity.CaseTreeNode;
 import com.testmanage.entity.TaskCase;
 import com.testmanage.service.CaseTreeService;
 import com.testmanage.service.TaskCaseService;
-import com.testmanage.utils.JsonParse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.hpsf.Array;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -104,8 +98,8 @@ public class CaseTreeController {
         List<TaskCase> ts = taskCaseService.findByTaskId(Long.valueOf(taskId));
         StringBuffer checkedKeys = new StringBuffer();
         checkedKeys.append("[");
-        for (int i=0;i<ts.size();i++){
-            if(i==ts.size()-1){
+        for (int i = 0; i < ts.size(); i++) {
+            if (i == ts.size() - 1) {
                 checkedKeys.append(ts.get(i).getTree_id());
                 break;
             }

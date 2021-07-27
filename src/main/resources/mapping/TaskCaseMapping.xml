@@ -13,8 +13,8 @@
         update
         <include refid="table"></include>
         set
-        status=#{status},
-        update_user=#{update_user},update_time=#{update_time,jdbcType=TIMESTAMP}
+        case_status=#{case_status},
+        update_user=#{update_user},update_date=#{update_date,jdbcType=TIMESTAMP}
         where
         task_id=#{task_id} and case_id=#{case_id}
     </update>
