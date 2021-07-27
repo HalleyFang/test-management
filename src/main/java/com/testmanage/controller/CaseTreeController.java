@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -69,9 +70,14 @@ public class CaseTreeController {
     }
 
     @GetMapping("taskTreeCase")
-    public HttpServletResponse taskTreeCase(HttpServletResponse resp) {
+    public HttpServletResponse taskTreeCase(@RequestParam String taskId, HttpServletResponse resp) {
         resp.setHeader("content-type", "application/json;charset=UTF-8");
-        String data = caseTreeService.getTree();
+        List<TaskCase> ts = taskCaseService.findByTaskId(Long.valueOf(taskId));
+        List<Long> treeId = new ArrayList<>();
+        for (int i = 0; i < ts.size(); i++) {
+            treeId.add(ts.get(i).getTree_id());
+        }
+        String data = caseTreeService.getTaskTree(Long.valueOf(taskId),treeId);
         if (data == null || data.isEmpty()) {
             return null;
         }

@@ -1,10 +1,8 @@
 package com.testmanage.service;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.testmanage.entity.CaseTreeNode;
+import com.testmanage.entity.TaskCase;
 import com.testmanage.mapper.CaseTreeMapper;
 import com.testmanage.service.user.UserContext;
 import com.testmanage.utils.JsonParse;
@@ -16,9 +14,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class CaseTreeService {
@@ -28,6 +25,9 @@ public class CaseTreeService {
 
     @Autowired
     SequenceUtil sequenceUtil;
+
+    @Autowired
+    TaskCaseService taskCaseService;
 
     @CacheEvict(value = "tree")
     public synchronized void addTree(JsonObject treeJson) throws Exception {
@@ -275,6 +275,96 @@ public class CaseTreeService {
         return treeJson.toString();
     }
 
+
+    public String getTaskTree(Long taskId,List<Long> treeId){
+        Stack stack = taskTree(treeId,null);
+        return taskTreeGenerate(taskId,stack);
+    }
+
+    private Stack taskTree(List<Long> treeId, Stack<Map<Long,List<Long>>> treeStack){
+        Map<Long,List<Long>> map = new HashMap<>();
+        for(Long tId : treeId){
+            Long parentId = 0L;
+            if(tId!=0L){
+            CaseTreeNode treeNode = caseTreeMapper.findTreeById(tId);
+            parentId = treeNode.getParent_id();
+            }
+            if(!map.containsKey(parentId)){
+                map.put(parentId,new ArrayList<>());
+            }
+            List<Long> list = map.get(parentId);
+            list.add(tId);
+            map.put(parentId,list);
+        }
+        if(treeStack==null){
+            treeStack = new Stack<>();
+        }
+        treeStack.add(map);
+        if(map.size()>1){
+            List<Long> parenIdList = new ArrayList<>();
+            for(Map.Entry entry: map.entrySet()){
+                parenIdList.add((Long) entry.getKey());
+            }
+            taskTree(parenIdList,treeStack);
+        }
+        return treeStack;
+    }
+
+    private String taskTreeGenerate(Long taskId,Stack<Map<Long,List<Long>>> treeStack){
+        if(treeStack.empty()){
+            return null;
+        }
+        Map<Long, JsonArray> parentMap = new HashMap<>();
+        List<JsonObject> jsonObjectList = new ArrayList<>();
+        for (int i=0;i<treeStack.size();i++){
+            Map<Long,List<Long>> treeMap = treeStack.pop();
+            //遍历父节点map
+            for(Map.Entry entry:treeMap.entrySet()){
+                List<Long> listNode = (List<Long>) entry.getValue();
+                //根节点
+ /*               if((Long)entry.getKey() ==0L){
+                    //遍历生成所有根节点
+                    for(Long id:listNode) {
+                        if (id != 0L) {
+                            CaseTreeNode caseTreeNode = caseTreeMapper.findTreeById(id);
+                            JsonObject jsonObject =
+                                    JsonParse.StringToJson(JsonParse.getGson().toJson(caseTreeNode));
+                            if (caseTreeNode.getIs_dir()) {
+                                JsonArray j = new JsonArray();
+                                jsonObject.add("children", j);
+                                parentMap.put(id, j);
+                            }
+                            jsonObjectMap.put(0L,jsonObject);
+                        }
+                    }
+                }else {*/
+                    for(Long id:listNode){
+                        if(id!=0L){
+                            CaseTreeNode caseTreeNode = caseTreeMapper.findTreeById(id);
+                            JsonObject jsonObject = JsonParse.StringToJson(JsonParse.getGson().toJson(caseTreeNode));
+                            if(caseTreeNode.getIs_dir()){
+                                JsonArray j = new JsonArray();
+                                jsonObject.add("children", j);
+                                parentMap.put(id, j);
+                            }else {
+                                JsonArray jsonArray = parentMap.get(entry.getKey());
+                                TaskCase taskCase = taskCaseService.query(taskId, caseTreeNode.getCase_id());
+                                jsonObject.addProperty("result", taskCase.getCase_status());
+                                jsonArray.add(jsonObject);
+                            }
+                            if((Long)entry.getKey()==0L) {
+                                jsonObjectList.add(jsonObject);
+                            }
+                        }
+                    }
+            }
+        }
+        JsonArray treeJson = new JsonArray();
+        for(JsonObject jo:jsonObjectList){
+            treeJson.add(jo);
+        }
+        return treeJson.toString();
+    }
 
     public Map<String, Object> analysisRequest(String body, String type) throws Exception {
         Map<String, Object> map = new HashMap<>();
