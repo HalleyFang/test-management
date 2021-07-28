@@ -66,12 +66,12 @@ public class CaseBodyToInfo {
         stringBuffer.append("[");
         for (Map.Entry<Integer, String> entry : opMap.entrySet()) {
             stringBuffer.append("{\"step\":\"").append(entry.getValue()).append("\",\"expect\":\"");
-            if (expMap.get(entry.getKey()).isEmpty()) {
+            if (expMap.get(entry.getKey())!=null && !expMap.get(entry.getKey()).isEmpty()) {
                 stringBuffer.append(expMap.get(entry.getKey()));
             }
             stringBuffer.append("\"},");
         }
-        stringBuffer.substring(0, stringBuffer.length() - 1);
+        stringBuffer.substring(0, stringBuffer.lastIndexOf(","));
         stringBuffer.append("]");
         caseInfo.setCase_step(stringBuffer.toString());
         return caseInfo;

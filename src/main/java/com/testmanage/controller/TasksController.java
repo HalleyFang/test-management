@@ -29,10 +29,10 @@ public class TasksController {
         JsonObject bodyJson = JsonParse.StringToJson(body);
         JsonObject params = (JsonObject) bodyJson.get("params");
         Task task = JsonParse.getGson().fromJson(params, Task.class);
-        String s = params.get("startTime") == null ? "" :
-                params.get("startTime").getAsString();
-        String e = params.get("endTime") == null ? "" :
-                params.get("endTime").getAsString();
+        String s = params.get("start_date") == null ? "" :
+                params.get("start_date").getAsString();
+        String e = params.get("end_date") == null ? "" :
+                params.get("end_date").getAsString();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         if (!s.isEmpty()) {
             task.setStart_date(simpleDateFormat.parse(s));
@@ -44,7 +44,7 @@ public class TasksController {
     }
 
     @PostMapping("listPage")
-    public HttpServletResponse listPage(@RequestBody String body, HttpServletResponse resp) {
+    public HttpServletResponse listPage(@RequestBody String body, HttpServletResponse resp) throws ParseException {
         String data = data(body);
         OutputStream outputStream = null;
         try {
@@ -64,11 +64,17 @@ public class TasksController {
     }
 
     @PostMapping("listPageByUser")
-    public HttpServletResponse listPageByUser(@RequestBody String body, HttpServletResponse resp) {
+    public HttpServletResponse listPageByUser(@RequestBody String body, HttpServletResponse resp) throws ParseException {
         String data = data(body);
+        if(data == null || data.isEmpty()){
+            return null;
+        }
         JsonArray json = new JsonArray();
         JsonArray jsonArray = JsonParse.getGson().fromJson(data, JsonArray.class);
         for (JsonElement jsonElement : jsonArray) {
+            if(jsonElement.isJsonNull() || jsonElement ==null){
+                break;
+            }
             String executor = jsonElement.getAsJsonObject().get("executor").getAsString();
             if (executor.equalsIgnoreCase(UserContext.get().getUsername())) {
                 json.add(jsonElement);
@@ -109,7 +115,7 @@ public class TasksController {
     }
 
 
-    private String data(String body) {
+    private String data(String body) throws ParseException {
         JsonObject bodyJson = JsonParse.StringToJson(body);
         JsonObject params = (JsonObject) bodyJson.get("params");
         String data = "";
@@ -118,12 +124,24 @@ public class TasksController {
         if (label != null && !label.isEmpty()) {
             try {
                 Long id = Long.parseLong(label);
-                data = JsonParse.getGson().toJson(taskService.findTaskById(id));
+                Task task = taskService.findTaskById(id);
+                if(task!=null) {
+                    data = JsonParse.getGson().toJson(task);
+                    if(!data.startsWith("[")) {
+                        data = "[" + data + "]";
+                    }
+                }
             } catch (Exception e) {
                 data = null;
             }
-            if (data == null) {
-                data = JsonParse.getGson().toJson(taskService.findTaskByLabel(label));
+            if (data == null || data.isEmpty()) {
+                Task task = taskService.findTaskByLabel(label);
+                if (task!=null) {
+                    data = JsonParse.getGson().toJson(task);
+                    if (!data.startsWith("[")) {
+                        data = "[" + data + "]";
+                    }
+                }
             }
         } else {
             if (page == null) {

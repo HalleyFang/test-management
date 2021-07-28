@@ -28,9 +28,9 @@ CREATE TABLE "public"."tasks" (
   "start_date" date,
   "end_date" date,
   "create_user" varchar(255) COLLATE "pg_catalog"."default",
-  "create_time" timestamp(0),
+  "create_date" timestamp(0),
   "update_user" varchar(255) COLLATE "pg_catalog"."default",
-  "update_time" timestamp(0),
+  "update_date" timestamp(0),
   "is_v" varchar(255) COLLATE "pg_catalog"."default",
   "ms" varchar(255) COLLATE "pg_catalog"."default"
 )

@@ -7,19 +7,19 @@
     <insert id="insertCase" parameterType="com.testmanage.entity.CaseInfo">
         insert into
         <include refid="table"/>
-        (id,case_id,case_name,case_pre,case_step,case_post,remark,create_user,create_time,is_v)
+        (id,case_id,case_name,case_pre,case_step,case_post,remark,create_user,create_date,is_v)
         values
         (#{id},#{case_id},#{case_name},#{case_pre},#{case_step},#{case_post},
-        #{remark},#{create_user},#{create_time,jdbcType=TIMESTAMP},#{is_v});
+        #{remark},#{create_user},#{create_date,jdbcType=TIMESTAMP},#{is_v});
     </insert>
     <insert id="insertCaseBatch">
         insert into
         <include refid="table"/>
-        (id,case_id,case_name,case_pre,case_step,case_post,remark,create_user,create_time,is_v)
+        (id,case_id,case_name,case_pre,case_step,case_post,remark,create_user,create_date,is_v)
         values
         <foreach collection ="caseInfos" item="caseInfo" index= "index" separator =",">
         (#{caseInfo.id},#{caseInfo.case_id},#{caseInfo.case_name},#{caseInfo.case_pre},#{caseInfo.case_step},#{caseInfo.case_post},
-        #{caseInfo.remark},#{caseInfo.create_user},#{caseInfo.create_time,jdbcType=TIMESTAMP},#{caseInfo.is_v})
+        #{caseInfo.remark},#{caseInfo.create_user},#{caseInfo.create_date,jdbcType=TIMESTAMP},#{caseInfo.is_v})
         </foreach >
     </insert>
 
@@ -42,7 +42,7 @@
         <if test="remark != null and remark != ''">
             remark=#{remark},
         </if>
-        update_user=#{update_user},update_time=#{update_time,jdbcType=TIMESTAMP}
+        update_user=#{update_user},update_date=#{update_date,jdbcType=TIMESTAMP}
         where
         case_id=#{case_id}
     </update>
@@ -66,7 +66,7 @@
         <if test="remark != null and remark != ''">
             remark=#{caseInfo.remark},
         </if>
-        update_user=#{caseInfo.update_user},update_time=#{caseInfo.update_time,jdbcType=TIMESTAMP}
+        update_user=#{caseInfo.update_user},update_date=#{caseInfo.update_date,jdbcType=TIMESTAMP}
         where
         case_id=#{caseInfo.case_id}
         </foreach>

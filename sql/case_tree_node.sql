@@ -30,9 +30,9 @@ CREATE TABLE "public"."case_tree_node" (
   "post_id" int8,
   "is_delete" bool NOT NULL DEFAULT false,
   "create_user" varchar COLLATE "pg_catalog"."default",
-  "create_time" timestamp(6) DEFAULT now(),
+  "create_date" timestamp(6) DEFAULT now(),
   "update_user" varchar COLLATE "pg_catalog"."default",
-  "update_time" timestamp(6) DEFAULT now(),
+  "update_date" timestamp(6) DEFAULT now(),
   "status" int4,
   "is_v" varchar COLLATE "pg_catalog"."default"
 )

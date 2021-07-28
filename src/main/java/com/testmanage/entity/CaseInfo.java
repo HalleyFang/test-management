@@ -20,8 +20,8 @@ public class CaseInfo implements Serializable {
     private Boolean is_reviewed = false;
     private String issue_id;
     private String create_user;
-    private Date create_time;
+    private Date create_date;
     private String update_user;
-    private Date update_time;
+    private Date update_date;
     private String is_v;
 }

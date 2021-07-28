@@ -11,6 +11,8 @@ public class TaskCase {
     private String case_id;
     private Integer case_status = 0;
     private Long tree_id;
+    private String create_user;
+    private Date create_date;
     private String update_user;
     private Date update_date;
 }

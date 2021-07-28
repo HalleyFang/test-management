@@ -17,9 +17,9 @@ public class Task {
     private Date start_date;
     private Date end_date;
     private String create_user;
-    private Date create_time;
+    private Date create_date;
     private String update_user;
-    private Date update_time;
+    private Date update_date;
     private String is_v;
 
 }

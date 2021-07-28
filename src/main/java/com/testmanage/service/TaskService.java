@@ -6,6 +6,7 @@ import com.testmanage.mapper.TaskCaseMapper;
 import com.testmanage.mapper.TaskMapper;
 import com.testmanage.mapper.UserConfMapper;
 import com.testmanage.service.user.UserContext;
+import com.testmanage.utils.SequenceUtil;
 import javafx.scene.input.DataFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -13,6 +14,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -24,11 +27,15 @@ public class TaskService {
     @Autowired
     TaskCaseMapper taskCaseMapper;
 
+    @Autowired
+    SequenceUtil sequenceUtil;
+
     @CacheEvict("tasks")
     public void addTask(Task task){
+        task.setId(Long.valueOf(sequenceUtil.getNext("taskId")));
         task.setCreate_user(UserContext.get().getUsername());
         task.setIs_v(UserContext.get().getIsV());
-        task.setCreate_time(new Date());
+        task.setCreate_date(new Date());
         taskMapper.addTask(task);
     }
 
@@ -47,23 +54,43 @@ public class TaskService {
         return taskMapper.findAllTask(UserContext.get().getIsV());
     }
 
-    public Task findTaskById(Long id){
+    public Task findTaskById(Long id) throws ParseException {
         Task task = taskMapper.findTaskById(id);
+        if(task==null){
+            return null;
+        }
         Map<String,Integer> map = taskStatus(task.getId());
         task.setCase_count(map.get("caseCount"));
         task.setStatus(map.get("status"));
+        task = formDate(task);
         return task;
     }
 
-    public Task findTaskByLabel(String label){
+    private Task formDate(Task task) throws ParseException {
+        Date startDate = task.getStart_date();
+        Date endDate = task.getEnd_date();
+        if(startDate!=null){
+            task.setStart_date(startDate);
+        }
+        if(endDate!=null){
+            task.setEnd_date(endDate);
+        }
+        return task;
+    }
+
+    public Task findTaskByLabel(String label) throws ParseException {
         Task task = taskMapper.findTaskByLabel(label,UserContext.get().getIsV());
+        if(task==null){
+            return null;
+        }
         Map<String,Integer> map = taskStatus(task.getId());
         task.setCase_count(map.get("caseCount"));
         task.setStatus(map.get("status"));
+        task = formDate(task);
         return task;
     }
 
-    public List<Task> findTaskPage(Integer page){
+    public List<Task> findTaskPage(Integer page) throws ParseException {
         List<Task> p = new ArrayList<>();
         List<Task> ts = findAllTask();
             for(int i=(page-1)*20;i<ts.size();i++){
@@ -72,6 +99,7 @@ public class TaskService {
                     Map<String,Integer> map = taskStatus(task.getId());
                     task.setCase_count(map.get("caseCount"));
                     task.setStatus(map.get("status"));
+                    task = formDate(task);
                     p.add(task);
                 }else {
                     break;

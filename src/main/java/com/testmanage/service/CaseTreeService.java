@@ -118,7 +118,7 @@ public class CaseTreeService {
                 caseTreeNode.setLabel(s);
                 caseTreeNode.setIs_v(UserContext.get().getIsV());
                 caseTreeNode.setCreate_user(UserContext.get().getUsername());
-                caseTreeNode.setCreate_time(new Date());
+                caseTreeNode.setCreate_date(new Date());
                 caseTreeNode.setStatus(0);
                 caseTreeMapper.addTree(caseTreeNode);
             }
@@ -144,7 +144,7 @@ public class CaseTreeService {
             caseTreeNode.setLabel(caseInfo.getCase_name());
             caseTreeNode.setIs_v(UserContext.get().getIsV());
             caseTreeNode.setCreate_user(UserContext.get().getUsername());
-            caseTreeNode.setCreate_time(new Date());
+            caseTreeNode.setCreate_date(new Date());
             caseTreeNode.setStatus(-1);
             caseTreeNode.setCase_id(caseInfo.getCase_id());
             caseTreeMapper.addTree(caseTreeNode);

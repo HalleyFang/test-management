@@ -8,7 +8,7 @@
         <include refid="table"></include>
         values
         (#{id},#{label},#{case_id},#{is_dir},#{parent_id},#{pre_id},#{post_id},#{is_delete},#{create_user},
-        #{create_time,jdbcType=TIMESTAMP},#{update_user,jdbcType=NULL},#{update_time,jdbcType=NULL},#{status},#{is_v})
+        #{create_date,jdbcType=TIMESTAMP},#{update_user,jdbcType=NULL},#{update_date,jdbcType=NULL},#{status},#{is_v})
     </insert>
     <update id="updateTree">
         update
@@ -29,7 +29,7 @@
         <if test="is_delete != null and is_delete != ''">
             is_delete=#{is_delete},
         </if>
-        update_user=#{update_user},update_time=#{update_time,jdbcType=TIMESTAMP}
+        update_user=#{update_user},update_date=#{update_date,jdbcType=TIMESTAMP}
         where
         id=#{id}
     </update>

@@ -31,9 +31,9 @@ CREATE TABLE "public"."case_info" (
   "is_delete" bool,
   "is_reviewed" bool,
   "create_user" varchar COLLATE "pg_catalog"."default",
-  "create_time" timestamp(6),
+  "create_date" timestamp(6),
   "update_user" varchar COLLATE "pg_catalog"."default",
-  "update_time" timestamp(6),
+  "update_date" timestamp(6),
   "issue_id" varchar COLLATE "pg_catalog"."default",
   "is_v" varchar COLLATE "pg_catalog"."default"
 )

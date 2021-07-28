@@ -6,10 +6,10 @@
     <insert id="addTask">
         insert into
         <include refid="table"></include>
-        (id,label,executor,start_date,end_date,create_user,create_time,is_v,ms)
+        (id,label,executor,start_date,end_date,create_user,create_date,is_v,ms)
         values
         (#{id},#{label},#{executor},#{start_date,jdbcType=DATE},
-        #{end_date,jdbcType=DATE},#{create_user},#{create_time,jdbcType=TIMESTAMP},#{is_v},#{ms})
+        #{end_date,jdbcType=DATE},#{create_user},#{create_date,jdbcType=TIMESTAMP},#{is_v},#{ms})
     </insert>
     <update id="updateTaskById">
         update
@@ -30,7 +30,7 @@
         <if test="ms != null and ms != ''">
             ms=#{ms},
         </if>
-        update_user=#{update_user},update_time=#{update_time,jdbcType=TIMESTAMP}
+        update_user=#{update_user},update_date=#{update_date,jdbcType=TIMESTAMP}
         where
         id=#{id}
     </update>
