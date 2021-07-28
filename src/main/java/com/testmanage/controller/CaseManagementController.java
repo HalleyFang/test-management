@@ -131,7 +131,7 @@ public class CaseManagementController {
                 CaseInfo caseInfo = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(excelCase), CaseInfo.class);
                 caseInfo = caseBodyToInfo.caseSteps(caseInfo, excelCase.getCase_operate(), excelCase.getCase_expect());
                 caseInfo.setIs_v(UserContext.get().getIsV());
-                if (!caseInfo.getCase_id().isEmpty()) {
+                if (caseInfo.getCase_id() != null && !caseInfo.getCase_id().isEmpty()) {
                     caseInfosUpdate.add(caseInfo);
                     continue;
                 }
@@ -140,6 +140,7 @@ public class CaseManagementController {
                 caseInfosInsert.add(caseInfo);
             }
             caseInfoService.addCase(caseInfosInsert);
+            caseTreeService.addTree(caseInfosInsert);
             caseInfoService.updateCase(caseInfosUpdate);
         } catch (Exception e) {
             e.printStackTrace();

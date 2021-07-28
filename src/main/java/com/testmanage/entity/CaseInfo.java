@@ -9,6 +9,7 @@ import java.util.Date;
 public class CaseInfo implements Serializable {
 
     private Integer id;
+    private String parent_name;
     private String case_id;
     private String case_name;
     private String case_pre;

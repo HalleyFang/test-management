@@ -22,4 +22,9 @@ public class UserConfService {
     public String getV(String username) {
         return userConfMapper.getParameter(username, "isV");
     }
+
+    @Cacheable("avatar")
+    public String getAvatar(String username){
+        return userConfMapper.getParameter(username,"avatar");
+    }
 }

@@ -12,14 +12,14 @@
         (#{id},#{case_id},#{case_name},#{case_pre},#{case_step},#{case_post},
         #{remark},#{create_user},#{create_time,jdbcType=TIMESTAMP},#{is_v});
     </insert>
-    <insert id="insertCaseBach">
+    <insert id="insertCaseBatch">
         insert into
         <include refid="table"/>
         (id,case_id,case_name,case_pre,case_step,case_post,remark,create_user,create_time,is_v)
         values
         <foreach collection ="caseInfos" item="caseInfo" index= "index" separator =",">
         (#{caseInfo.id},#{caseInfo.case_id},#{caseInfo.case_name},#{caseInfo.case_pre},#{caseInfo.case_step},#{caseInfo.case_post},
-        #{caseInfo.remark},#{caseInfo.create_user},#{caseInfo.create_time,jdbcType=TIMESTAMP},#{is_v})
+        #{caseInfo.remark},#{caseInfo.create_user},#{caseInfo.create_time,jdbcType=TIMESTAMP},#{caseInfo.is_v})
         </foreach >
     </insert>
 

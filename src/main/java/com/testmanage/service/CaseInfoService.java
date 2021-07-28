@@ -54,7 +54,7 @@ public class CaseInfoService {
     }
 
     public void addCase(List<CaseInfo> caseInfos) {
-        caseInfoMapper.insertCaseBach(caseInfos);
+        caseInfoMapper.insertCaseBatch(caseInfos);
     }
 
     public void updateCase(CaseInfo caseInfo) {

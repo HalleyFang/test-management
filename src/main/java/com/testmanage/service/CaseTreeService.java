@@ -1,6 +1,7 @@
 package com.testmanage.service;
 
 import com.google.gson.*;
+import com.testmanage.entity.CaseInfo;
 import com.testmanage.entity.CaseTreeNode;
 import com.testmanage.entity.TaskCase;
 import com.testmanage.mapper.CaseTreeMapper;
@@ -94,6 +95,60 @@ public class CaseTreeService {
 
         }
 
+    }
+
+    @CacheEvict(value = "tree")
+    public synchronized void addTree(List<CaseInfo> list){
+        Set<String> parent = new HashSet<>();
+        for (CaseInfo caseInfo : list){
+            String parent_name = caseInfo.getParent_name();
+            if(parent_name==null || parent_name.isEmpty()){
+                parent_name="DEFAULT";
+            }
+            parent.add(parent_name);
+        }
+        for (String s : parent){
+            Long id = caseTreeMapper.findNodeByName(s,UserContext.get().getIsV());
+            if(id==null){
+                CaseTreeNode caseTreeNode = new CaseTreeNode();
+                caseTreeNode.setId(Long.valueOf(sequenceUtil.getNext("treeId")));
+                caseTreeNode.setParent_id(0L);
+//                caseTreeNode.setPre_id(); todo 排序
+                caseTreeNode.setIs_dir(true);
+                caseTreeNode.setLabel(s);
+                caseTreeNode.setIs_v(UserContext.get().getIsV());
+                caseTreeNode.setCreate_user(UserContext.get().getUsername());
+                caseTreeNode.setCreate_time(new Date());
+                caseTreeNode.setStatus(0);
+                caseTreeMapper.addTree(caseTreeNode);
+            }
+        }
+
+        List<Long> idList = new ArrayList<>();
+        for(int i=0;i<list.size();i++){
+            idList.add(Long.valueOf(sequenceUtil.getNext("treeId")));
+        }
+        for (int i=0;i<list.size();i++){
+            CaseInfo caseInfo = list.get(i);
+            Long parentId = caseTreeMapper.findNodeByName(caseInfo.getParent_name(),UserContext.get().getIsV());
+            CaseTreeNode caseTreeNode = new CaseTreeNode();
+            caseTreeNode.setId(idList.get(i));
+            if(i>0){
+                caseTreeNode.setPre_id(idList.get(i-1));
+            }
+            if(i<list.size()-1){
+                caseTreeNode.setPost_id(idList.get(i+1));
+            }
+            caseTreeNode.setParent_id(parentId);
+            caseTreeNode.setIs_dir(false);
+            caseTreeNode.setLabel(caseInfo.getCase_name());
+            caseTreeNode.setIs_v(UserContext.get().getIsV());
+            caseTreeNode.setCreate_user(UserContext.get().getUsername());
+            caseTreeNode.setCreate_time(new Date());
+            caseTreeNode.setStatus(-1);
+            caseTreeNode.setCase_id(caseInfo.getCase_id());
+            caseTreeMapper.addTree(caseTreeNode);
+        }
     }
 
     @CacheEvict(value = "tree")

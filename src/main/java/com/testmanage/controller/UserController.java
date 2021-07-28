@@ -27,11 +27,14 @@ public class UserController {
     public void avatar(HttpServletResponse response) throws IOException {
         OutputStream os = null;
         try {
-            ClassPathResource classPathResource = new ClassPathResource("static/img/avatar.png");
+            String path = userConfService.getAvatar(UserContext.get().getUsername());
+            if(path==null || path.isEmpty()){
+                path="static/img/avatar.png";
+            }
+            ClassPathResource classPathResource = new ClassPathResource(path);
             BufferedImage image = ImageIO.read(classPathResource.getInputStream());
             response.setContentType("image/png");
             os = response.getOutputStream();
-
             if (image != null) {
                 ImageIO.write(image, "png", os);
             }

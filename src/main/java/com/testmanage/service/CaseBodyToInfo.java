@@ -65,7 +65,7 @@ public class CaseBodyToInfo {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append("[");
         for (Map.Entry<Integer, String> entry : opMap.entrySet()) {
-            stringBuffer.append("{\"").append(entry.getValue()).append("\":\"");
+            stringBuffer.append("{\"step\":\"").append(entry.getValue()).append("\",\"expect\":\"");
             if (expMap.get(entry.getKey()).isEmpty()) {
                 stringBuffer.append(expMap.get(entry.getKey()));
             }
@@ -81,13 +81,18 @@ public class CaseBodyToInfo {
     private Map<Integer, String> opStr(String str) {
         String[] strings = str.split("\n");
         List<String> list = new ArrayList<>();
-        for (String s : strings) {
-            if (s.matches("^[0-9]+[.]")) {
+        for (int i=0;i<strings.length;i++) {
+            String s = strings[i];
+            if(i==0 && !s.matches("^[0-9]+[.].*")){
+                list.add(str);
+                break;
+            }
+            if (s.matches("^[0-9]+[.].*")) {
                 list.add(s);
             } else {
-                String t = list.get(list.size() - 1);
+                String t = list.get(i - 1);
                 t = t + "\n" + s;
-                list.remove(list.size() - 1);
+//                list.remove(list.size() - 1);
                 list.add(t);
             }
         }
