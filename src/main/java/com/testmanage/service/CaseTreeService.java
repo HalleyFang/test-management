@@ -228,7 +228,7 @@ public class CaseTreeService {
 
     //todo 排序
     private String generateTree(Long parentId, JsonObject jsonObject, Map<Long, JsonArray> map) {
-        JsonArray treeJson = new JsonArray();
+        JsonArray treeJson = new JsonArray();//用来存放树结果，递归多次创建并不影响最终的结果
         List<CaseTreeNode> treeNodeList = caseTreeMapper.findTreeByParent(parentId, UserContext.get().getIsV());
         if (treeNodeList.size() == 0) {
             return null;
@@ -246,8 +246,9 @@ public class CaseTreeService {
                     JsonArray j = new JsonArray();
                     jsonObject.add("children", j);
                     map = new HashMap<>();
-                    map.put(node.getId(), j);
+                    map.put(node.getId(), j);//将children和parentId关心存入map
                 } else {
+                    //中间节点
                     JsonArray jsonArray = map.get(parentId).getAsJsonArray();
                     JsonObject j2 = new JsonObject();
                     j2.addProperty("id", node.getId());
@@ -263,25 +264,28 @@ public class CaseTreeService {
                 generateTree(node.getId(), jsonObject, map);
             }
             if (!node.getIs_dir() && !node.getIs_delete()) {
-                JsonArray jsonArray = map.get(parentId).getAsJsonArray();
+                JsonArray jsonArray = map.get(parentId).getAsJsonArray();//对children对象进行修改
                 String str = JsonParse.getGson().toJson(node);
                 JsonObject nodeJson = JsonParse.StringToJson(str);
                 nodeJson.addProperty("icon", "el-icon-tickets");
                 jsonArray.add(nodeJson);
             }
-            treeJson.add(jsonObject);
+            treeJson.add(jsonObject);//只关心最终结果，将jsonObject加入结果
         }
 
         return treeJson.toString();
     }
 
 
-    public String getTaskTree(Long taskId,List<Long> treeId){
+    public String getTaskTree(Long taskId,List<Long> treeId) throws Exception {
         Stack stack = taskTree(treeId,null);
         return taskTreeGenerate(taskId,stack);
     }
 
-    private Stack taskTree(List<Long> treeId, Stack<Map<Long,List<Long>>> treeStack){
+    private Stack taskTree(List<Long> treeId, Stack<Map<Long,List<Long>>> treeStack) throws Exception {
+        if(treeId.size()==0){
+            throw new Exception("请关联用例");
+        }
         Map<Long,List<Long>> map = new HashMap<>();
         for(Long tId : treeId){
             Long parentId = 0L;
@@ -299,8 +303,8 @@ public class CaseTreeService {
         if(treeStack==null){
             treeStack = new Stack<>();
         }
-        treeStack.add(map);
-        if(map.size()>1){
+        treeStack.push(map);
+        if(map.size()>1 || !map.containsKey(0L)){
             List<Long> parenIdList = new ArrayList<>();
             for(Map.Entry entry: map.entrySet()){
                 parenIdList.add((Long) entry.getKey());
@@ -316,40 +320,31 @@ public class CaseTreeService {
         }
         Map<Long, JsonArray> parentMap = new HashMap<>();
         List<JsonObject> jsonObjectList = new ArrayList<>();
-        for (int i=0;i<treeStack.size();i++){
+        Integer stackSize = treeStack.size();
+        for (int i=0;i<stackSize;i++){
             Map<Long,List<Long>> treeMap = treeStack.pop();
-            //遍历父节点map
+            //遍历节点map
             for(Map.Entry entry:treeMap.entrySet()){
                 List<Long> listNode = (List<Long>) entry.getValue();
-                //根节点
- /*               if((Long)entry.getKey() ==0L){
-                    //遍历生成所有根节点
-                    for(Long id:listNode) {
-                        if (id != 0L) {
-                            CaseTreeNode caseTreeNode = caseTreeMapper.findTreeById(id);
-                            JsonObject jsonObject =
-                                    JsonParse.StringToJson(JsonParse.getGson().toJson(caseTreeNode));
-                            if (caseTreeNode.getIs_dir()) {
-                                JsonArray j = new JsonArray();
-                                jsonObject.add("children", j);
-                                parentMap.put(id, j);
-                            }
-                            jsonObjectMap.put(0L,jsonObject);
-                        }
-                    }
-                }else {*/
                     for(Long id:listNode){
                         if(id!=0L){
                             CaseTreeNode caseTreeNode = caseTreeMapper.findTreeById(id);
-                            JsonObject jsonObject = JsonParse.StringToJson(JsonParse.getGson().toJson(caseTreeNode));
+                            JsonObject jsonObject = new JsonObject();
                             if(caseTreeNode.getIs_dir()){
+                                if(caseTreeNode.getParent_id()==0L){
+                                    caseTreeNode.setParent_id(null);
+                                }
+                                jsonObject = JsonParse.StringToJson(JsonParse.getGson().toJson(caseTreeNode));
+                                jsonObject.addProperty("icon", "el-icon-folder");
                                 JsonArray j = new JsonArray();
                                 jsonObject.add("children", j);
                                 parentMap.put(id, j);
                             }else {
                                 JsonArray jsonArray = parentMap.get(entry.getKey());
                                 TaskCase taskCase = taskCaseService.query(taskId, caseTreeNode.getCase_id());
+                                jsonObject = JsonParse.StringToJson(JsonParse.getGson().toJson(caseTreeNode));
                                 jsonObject.addProperty("result", taskCase.getCase_status());
+                                jsonObject.addProperty("icon", "el-icon-tickets");
                                 jsonArray.add(jsonObject);
                             }
                             if((Long)entry.getKey()==0L) {

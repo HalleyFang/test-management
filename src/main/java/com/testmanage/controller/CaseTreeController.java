@@ -69,8 +69,14 @@ public class CaseTreeController {
         caseTreeService.deleteTree(id);
     }
 
+    /**
+     * 执行用例获取用例树
+     * @param taskId
+     * @param resp
+     * @return
+     */
     @GetMapping("taskTreeCase")
-    public HttpServletResponse taskTreeCase(@RequestParam String taskId, HttpServletResponse resp) {
+    public HttpServletResponse taskTreeCase(@RequestParam String taskId, HttpServletResponse resp) throws Exception {
         resp.setHeader("content-type", "application/json;charset=UTF-8");
         List<TaskCase> ts = taskCaseService.findByTaskId(Long.valueOf(taskId));
         List<Long> treeId = new ArrayList<>();
@@ -98,6 +104,12 @@ public class CaseTreeController {
         return null;
     }
 
+    /**
+     * 获取选中的节点
+     * @param taskId
+     * @param resp
+     * @return
+     */
     @GetMapping("taskCaseChecked")
     public HttpServletResponse taskCase(@RequestParam String taskId, HttpServletResponse resp) {
         resp.setHeader("content-type", "application/json;charset=UTF-8");

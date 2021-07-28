@@ -1,6 +1,8 @@
 package com.testmanage.service;
 
 import com.testmanage.entity.Task;
+import com.testmanage.entity.TaskCase;
+import com.testmanage.mapper.TaskCaseMapper;
 import com.testmanage.mapper.TaskMapper;
 import com.testmanage.mapper.UserConfMapper;
 import com.testmanage.service.user.UserContext;
@@ -10,16 +12,17 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.text.DecimalFormat;
+import java.util.*;
 
 @Service
 public class TaskService {
 
     @Autowired
     TaskMapper taskMapper;
+
+    @Autowired
+    TaskCaseMapper taskCaseMapper;
 
     @CacheEvict("tasks")
     public void addTask(Task task){
@@ -45,27 +48,53 @@ public class TaskService {
     }
 
     public Task findTaskById(Long id){
-        return taskMapper.findTaskById(id);
+        Task task = taskMapper.findTaskById(id);
+        Map<String,Integer> map = taskStatus(task.getId());
+        task.setCase_count(map.get("caseCount"));
+        task.setStatus(map.get("status"));
+        return task;
     }
 
     public Task findTaskByLabel(String label){
-        return taskMapper.findTaskByLabel(label,UserContext.get().getIsV());
+        Task task = taskMapper.findTaskByLabel(label,UserContext.get().getIsV());
+        Map<String,Integer> map = taskStatus(task.getId());
+        task.setCase_count(map.get("caseCount"));
+        task.setStatus(map.get("status"));
+        return task;
     }
 
     public List<Task> findTaskPage(Integer page){
         List<Task> p = new ArrayList<>();
         List<Task> ts = findAllTask();
-        if(ts.size()<20){
-            p = ts;
-        }else {
             for(int i=(page-1)*20;i<ts.size();i++){
                 if(i<page*20){
-                    p.add(ts.get(i));
+                    Task task = ts.get(i);
+                    Map<String,Integer> map = taskStatus(task.getId());
+                    task.setCase_count(map.get("caseCount"));
+                    task.setStatus(map.get("status"));
+                    p.add(task);
                 }else {
                     break;
                 }
             }
-        }
         return p;
+    }
+
+    public Map<String,Integer> taskStatus(Long taskId){
+        Map<String,Integer> map= new HashMap<>();
+        List<TaskCase> list = taskCaseMapper.findByTaskId(taskId);
+        map.put("caseCount",list.size());
+        List<TaskCase> success = new ArrayList<>();
+        for(TaskCase taskCase:list){
+            if (taskCase.getCase_status()==1){
+                success.add(taskCase);
+            }
+        }
+        Integer status = 0;
+        if(list.size()>0){
+            status = Math.round(((float) success.size()/list.size())*100);
+        }
+        map.put("status",status);
+        return map;
     }
 }

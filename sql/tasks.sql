@@ -3,16 +3,16 @@
 
  Source Server         : local pg
  Source Server Type    : PostgreSQL
- Source Server Version : 100009
- Source Host           : 192.168.31.158:5432
+ Source Server Version : 90506
+ Source Host           : localhost:5432
  Source Catalog        : postgres
  Source Schema         : public
 
  Target Server Type    : PostgreSQL
- Target Server Version : 100009
+ Target Server Version : 90506
  File Encoding         : 65001
 
- Date: 25/07/2021 17:03:59
+ Date: 28/07/2021 14:29:57
 */
 
 
@@ -31,7 +31,8 @@ CREATE TABLE "public"."tasks" (
   "create_time" timestamp(0),
   "update_user" varchar(255) COLLATE "pg_catalog"."default",
   "update_time" timestamp(0),
-  "is_v" varchar(255) COLLATE "pg_catalog"."default"
+  "is_v" varchar(255) COLLATE "pg_catalog"."default",
+  "ms" varchar(255) COLLATE "pg_catalog"."default"
 )
 ;
 

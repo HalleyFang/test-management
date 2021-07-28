@@ -6,10 +6,10 @@
     <insert id="addTask">
         insert into
         <include refid="table"></include>
-        (id,label,status,executor,start_date,end_date,create_user,create_time,is_v)
+        (id,label,executor,start_date,end_date,create_user,create_time,is_v,ms)
         values
-        (#{id},#{label},#{status},#{executor},#{start_date,jdbcType=DATE},
-        #{end_date,jdbcType=DATE},#{create_user},#{create_time,jdbcType=TIMESTAMP},#{is_v})
+        (#{id},#{label},#{executor},#{start_date,jdbcType=DATE},
+        #{end_date,jdbcType=DATE},#{create_user},#{create_time,jdbcType=TIMESTAMP},#{is_v},#{ms})
     </insert>
     <update id="updateTaskById">
         update
@@ -17,9 +17,6 @@
         set
         <if test="label != null and label != ''">
             label=#{label},
-        </if>
-        <if test="status != null and status != ''">
-            status=#{status},
         </if>
         <if test="executor != null and executor != ''">
             executor=#{executor},
@@ -29,6 +26,9 @@
         </if>
         <if test="end_date != null and end_date != ''">
             end_date=#{end_date},
+        </if>
+        <if test="ms != null and ms != ''">
+            ms=#{ms},
         </if>
         update_user=#{update_user},update_time=#{update_time,jdbcType=TIMESTAMP}
         where

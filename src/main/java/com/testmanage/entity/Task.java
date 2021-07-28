@@ -9,7 +9,10 @@ public class Task {
 
     private Long id;
     private String label;
+    private String ms;
+    private Boolean is_complete = false;
     private Integer status = 0;
+    private Integer case_count;
     private String executor;
     private Date start_date;
     private Date end_date;
