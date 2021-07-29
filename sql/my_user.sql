@@ -12,7 +12,7 @@
  Target Server Version : 90506
  File Encoding         : 65001
 
- Date: 23/07/2021 17:54:05
+ Date: 29/07/2021 11:28:58
 */
 
 
@@ -33,3 +33,7 @@ CREATE TABLE "public"."my_user" (
 -- Records of my_user
 -- ----------------------------
 INSERT INTO "public"."my_user" VALUES (1, 'admin', '123456', NULL, NULL);
+INSERT INTO "public"."my_user" VALUES (2, 'halley.fang', 'h12345', NULL, NULL);
+INSERT INTO "public"."my_user" VALUES (3, 'nina.ding', 'n12345', NULL, NULL);
+INSERT INTO "public"."my_user" VALUES (4, 'irene.chang', 'c12345', NULL, NULL);
+INSERT INTO "public"."my_user" VALUES (5, 'may.wang', 'w12345', NULL, NULL);

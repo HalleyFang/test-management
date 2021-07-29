@@ -29,6 +29,7 @@ CREATE TABLE "public"."sequence" (
 -- ----------------------------
 -- Records of sequence
 -- ----------------------------
-INSERT INTO "public"."sequence" VALUES ('caseInfo', 9);
-INSERT INTO "public"."sequence" VALUES ('caseId', 32);
-INSERT INTO "public"."sequence" VALUES ('treeId', 51);
+INSERT INTO "public"."sequence" VALUES ('caseInfo', 1);
+INSERT INTO "public"."sequence" VALUES ('caseId', 1);
+INSERT INTO "public"."sequence" VALUES ('treeId', 1);
+INSERT INTO "public"."sequence" VALUES ('taskId', 1);
