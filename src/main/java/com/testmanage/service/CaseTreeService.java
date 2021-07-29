@@ -341,7 +341,7 @@ public class CaseTreeService {
         if(treeId.size()==0){
             throw new Exception("请关联用例");
         }
-        Map<Long,List<Long>> map = new HashMap<>();
+        Map<Long,List<Long>> map = new HashMap<>();//父节点和子节点对应关系
         for(Long tId : treeId){
             Long parentId = 0L;
             if(tId!=0L){
@@ -384,16 +384,17 @@ public class CaseTreeService {
                     for(Long id:listNode){
                         if(id!=0L){
                             CaseTreeNode caseTreeNode = caseTreeMapper.findTreeById(id);
-                            JsonObject jsonObject = new JsonObject();
+                            JsonObject jsonObject;
                             if(caseTreeNode.getIs_dir()){
-                                if(caseTreeNode.getParent_id()==0L){
-                                    caseTreeNode.setParent_id(null);
-                                }
                                 jsonObject = JsonParse.StringToJson(JsonParse.getGson().toJson(caseTreeNode));
                                 jsonObject.addProperty("icon", "el-icon-folder");
                                 JsonArray j = new JsonArray();
                                 jsonObject.add("children", j);
                                 parentMap.put(id, j);
+                                if(caseTreeNode.getParent_id()!=0L){
+                                    JsonArray jsonArray = parentMap.get(entry.getKey());
+                                    jsonArray.add(jsonObject);
+                                }
                             }else {
                                 JsonArray jsonArray = parentMap.get(entry.getKey());
                                 TaskCase taskCase = taskCaseService.query(taskId, caseTreeNode.getCase_id());

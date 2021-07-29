@@ -71,9 +71,9 @@ public class CaseBodyToInfo {
             }
             stringBuffer.append("\"},");
         }
-        stringBuffer.substring(0, stringBuffer.lastIndexOf(","));
-        stringBuffer.append("]");
-        caseInfo.setCase_step(stringBuffer.toString());
+        String step = stringBuffer.substring(0, stringBuffer.lastIndexOf(","));
+        step = step +"]";
+        caseInfo.setCase_step(step);
         return caseInfo;
     }
 

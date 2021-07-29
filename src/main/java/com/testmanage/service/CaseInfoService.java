@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,8 @@ public class CaseInfoService {
     public void addCase(CaseInfo caseInfo) {
         caseInfo.setCase_id(getCaseId());
         caseInfo.setIs_v(UserContext.get().getIsV());
+        caseInfo.setCreate_user(UserContext.get().getUsername());
+        caseInfo.setCreate_date(new Date());
         caseInfoMapper.insertCase(caseInfo);
     }
 
@@ -49,6 +52,8 @@ public class CaseInfoService {
         caseInfo.setCase_name(node.getLabel());
         caseInfo.setCase_step("[{\"step\":\"\",\"expect\":\"\"}]");
         caseInfo.setIs_v(UserContext.get().getIsV());
+        caseInfo.setCreate_user(UserContext.get().getUsername());
+        caseInfo.setCreate_date(new Date());
         caseInfoMapper.insertCase(caseInfo);
         log.info("insert case id " + caseId);
     }
@@ -58,6 +63,8 @@ public class CaseInfoService {
     }
 
     public void updateCase(CaseInfo caseInfo) {
+        caseInfo.setUpdate_user(UserContext.get().getUsername());
+        caseInfo.setUpdate_date(new Date());
         caseInfoMapper.updateCase(caseInfo);
     }
 

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -132,11 +133,15 @@ public class CaseManagementController {
                 caseInfo = caseBodyToInfo.caseSteps(caseInfo, excelCase.getCase_operate(), excelCase.getCase_expect());
                 caseInfo.setIs_v(UserContext.get().getIsV());
                 if (caseInfo.getCase_id() != null && !caseInfo.getCase_id().isEmpty()) {
+                    caseInfo.setUpdate_user(UserContext.get().getUsername());
+                    caseInfo.setUpdate_date(new Date());//时间会不准，需要研究一下怎么让数据库自动产生该时间
                     caseInfosUpdate.add(caseInfo);
                     continue;
                 }
                 caseInfo.setCase_id(caseInfoService.getCaseId());
                 caseInfo.setId(sequenceUtil.getNext("caseInfo"));
+                caseInfo.setCreate_user(UserContext.get().getUsername());
+                caseInfo.setCreate_date(new Date());
                 caseInfosInsert.add(caseInfo);
             }
             caseInfoService.addCase(caseInfosInsert);
