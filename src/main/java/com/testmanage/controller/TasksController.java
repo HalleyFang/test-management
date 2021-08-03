@@ -11,10 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -29,6 +31,12 @@ public class TasksController {
         JsonObject bodyJson = JsonParse.StringToJson(body);
         JsonObject params = (JsonObject) bodyJson.get("params");
         Task task = JsonParse.getGson().fromJson(params, Task.class);
+        task = taskDate(params,task);
+        taskService.addTask(task);
+    }
+
+
+    private Task taskDate(JsonObject params,Task task) throws ParseException {
         String s = params.get("start_date") == null ? "" :
                 params.get("start_date").getAsString();
         String e = params.get("end_date") == null ? "" :
@@ -40,7 +48,7 @@ public class TasksController {
         if (!e.isEmpty()) {
             task.setEnd_date(simpleDateFormat.parse(e));
         }
-        taskService.addTask(task);
+        return task;
     }
 
     @PostMapping("listPage")
@@ -53,12 +61,6 @@ public class TasksController {
             outputStream.write(dataByteArr);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                outputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
         return null;
     }
@@ -107,10 +109,11 @@ public class TasksController {
     }
 
     @PostMapping("edit")
-    public void updateTask(@RequestBody String body) {
+    public void updateTask(@RequestBody String body) throws ParseException {
         JsonObject bodyJson = JsonParse.StringToJson(body);
         JsonObject params = (JsonObject) bodyJson.get("params");
         Task task = JsonParse.getGson().fromJson(params, Task.class);
+        task = taskDate(params,task);
         taskService.updateTask(task);
     }
 

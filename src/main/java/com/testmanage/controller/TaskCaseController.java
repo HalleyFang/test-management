@@ -57,12 +57,6 @@ public class TaskCaseController {
             outputStream.write(dataByteArr);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                outputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
         return null;
     }
@@ -81,6 +75,6 @@ public class TaskCaseController {
         taskCase.setCase_status(status);
         taskCase.setUpdate_user(UserContext.get().getUsername());
         taskCase.setUpdate_date(new Date());
-        taskCaseService.addCase(taskCase);
+        taskCaseService.updateCase(taskCase);
     }
 }

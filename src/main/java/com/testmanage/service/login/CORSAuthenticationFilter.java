@@ -19,7 +19,26 @@ public class CORSAuthenticationFilter extends FormAuthenticationFilter {
             if (((HttpServletRequest) request).getMethod().toUpperCase().equals("OPTIONS")) {
                 return true;
             }
-            if (((HttpServletRequest) request).getRequestURI().contains("/img/")) {
+            String uri = ((HttpServletRequest) request).getRequestURI();
+            if (uri.contains("/img")) {
+                return true;
+            }
+            if (uri.contains("/css")) {
+                return true;
+            }
+            if (uri.contains("/js")) {
+                return true;
+            }
+            if (uri.contains(".ico")) {
+                return true;
+            }
+            if (uri.contains("/fonts")) {
+                return true;
+            }
+            if (uri.contains("/login")) {
+                return true;
+            }
+            if (uri.contains("/logout")) {
                 return true;
             }
         }

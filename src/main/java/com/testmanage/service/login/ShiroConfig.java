@@ -50,6 +50,13 @@ public class ShiroConfig {
         Map<String, String> map = new HashMap<>();
         //authc:所有url必须通过认证才能访问，anon:所有url都可以匿名访问
         map.put("/**", "corsAuthenticationFilter");
+        map.put("/css/**", "anon");
+        map.put("/login", "anon");
+        map.put("/auth/login", "anon");
+        map.put("/fonts/**", "anon");
+        map.put("/js/**", "anon");
+        map.put("/img/**", "anon");
+        map.put("/image/**", "anon");
         //登录
         shiroFilterFactoryBean.setLoginUrl("/login");
         //首页
@@ -82,4 +89,5 @@ public class ShiroConfig {
     public SessionManager sessionManager() {
         return new CustomSessionManager();
     }
+
 }

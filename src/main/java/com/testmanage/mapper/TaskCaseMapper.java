@@ -14,6 +14,8 @@ public interface TaskCaseMapper {
 
     void deleteCase(TaskCase taskCase);
 
+    void deleteCaseById(String case_id);
+
     List<TaskCase> findByTaskId(Long task_id);
 
     TaskCase findById(Long task_id,String case_id);

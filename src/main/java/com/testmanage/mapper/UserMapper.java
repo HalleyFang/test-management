@@ -13,4 +13,5 @@ public interface UserMapper {
     MyUser deleteUser(MyUser user);
     MyUser getUserByName(String username);
     List<MyUser> getAllUser();
+    List<MyUser> getAllUserIgnore(String username);
 }

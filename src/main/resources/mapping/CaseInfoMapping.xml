@@ -51,19 +51,19 @@
         update
         <include refid="table"/>
         set
-        <if test="case_name != null and case_name != ''">
+        <if test="caseInfo.case_name != null and caseInfo.case_name != ''">
             case_name=#{caseInfo.case_name},
         </if>
-        <if test="case_pre != null and case_pre != ''">
+        <if test="caseInfo.case_pre != null and caseInfo.case_pre != ''">
             case_pre=#{caseInfo.case_pre},
         </if>
-        <if test="case_step != null and case_step != ''">
+        <if test="caseInfo.case_step != null and caseInfo.case_step != ''">
             case_step=#{caseInfo.case_step},
         </if>
-        <if test="case_post != null and case_post != ''">
+        <if test="caseInfo.case_post != null and caseInfo.case_post != ''">
             case_post=#{caseInfo.case_post},
         </if>
-        <if test="remark != null and remark != ''">
+        <if test="caseInfo.remark != null and caseInfo.remark != ''">
             remark=#{caseInfo.remark},
         </if>
         update_user=#{caseInfo.update_user},update_date=#{caseInfo.update_date,jdbcType=TIMESTAMP}

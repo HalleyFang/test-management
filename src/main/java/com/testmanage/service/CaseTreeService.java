@@ -8,6 +8,7 @@ import com.testmanage.mapper.CaseTreeMapper;
 import com.testmanage.service.user.UserContext;
 import com.testmanage.utils.JsonParse;
 import com.testmanage.utils.SequenceUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -19,6 +20,7 @@ import java.util.*;
 import java.util.List;
 
 @Service
+@Slf4j
 public class CaseTreeService {
 
     @Autowired
@@ -174,12 +176,37 @@ public class CaseTreeService {
     }
 
     @CacheEvict(value = "tree")
+    public synchronized void updateTreeLabel(List<CaseInfo> caseInfoUpdate) throws Exception {
+        for (CaseInfo caseInfo : caseInfoUpdate){
+            CaseTreeNode node = caseTreeMapper.findTreeByCaseId(caseInfo.getCase_id());
+            if(node==null){
+                throw new Exception("更新 tree label 找不到节点");
+            }
+            String label = node.getLabel();
+            if((label == null || !label.equalsIgnoreCase(caseInfo.getCase_name()))
+            && caseInfo.getCase_name() != null){
+                CaseTreeNode caseTreeNode = new CaseTreeNode();
+                caseTreeNode.setId(node.getId());
+                caseTreeNode.setLabel(caseInfo.getCase_name());
+                caseTreeNode.setUpdate_user(UserContext.get().getUsername());
+                caseTreeNode.setUpdate_date(new Date());
+                caseTreeMapper.updateTree(caseTreeNode);
+            }
+        }
+    }
+
+    @CacheEvict(value = "tree")
     public synchronized void deleteTree(String caseId) {
         Long id = caseTreeMapper.findNodeByCaseId(caseId);
         deleteTree(id);
     }
 
     @CacheEvict(value = "tree")
+    public synchronized void updateTree(CaseTreeNode caseTreeNode) throws Exception {
+        caseTreeMapper.updateTree(caseTreeNode);
+    }
+
+        @CacheEvict(value = "tree")
     public synchronized void updateTree(JsonObject treeJson) throws Exception {
         Map<String, Object> resultMap = analysisTreeJson(treeJson);
         CaseTreeNode currentNode = (CaseTreeNode) resultMap.get("currentNode");
@@ -203,7 +230,6 @@ public class CaseTreeService {
             caseTreeMapper.updateTree(currentNode);            //todo 没变的字段不更新
         }
     }
-
 
     private Map<String, Object> analysisTreeJson(JsonObject treeJson) throws Exception {
         Map<String, Object> resultMap = new HashMap<>();
@@ -346,7 +372,11 @@ public class CaseTreeService {
             Long parentId = 0L;
             if(tId!=0L){
             CaseTreeNode treeNode = caseTreeMapper.findTreeById(tId);
-            parentId = treeNode.getParent_id();
+            if(treeNode==null){
+                log.error("node can not find by id: " + tId + "; please check is it be deleted");
+            }else {
+                parentId = treeNode.getParent_id();
+            }
             }
             if(!map.containsKey(parentId)){
                 map.put(parentId,new ArrayList<>());
@@ -470,6 +500,10 @@ public class CaseTreeService {
 
     public CaseTreeNode getTreeById(Long id){
         return caseTreeMapper.findTreeById(id);
+    }
+
+    public CaseTreeNode getTreeByCaseId(String caseId){
+        return caseTreeMapper.findTreeByCaseId(caseId);
     }
 
 }

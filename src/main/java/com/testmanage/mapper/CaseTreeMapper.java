@@ -18,6 +18,8 @@ public interface CaseTreeMapper {
 
     CaseTreeNode findTreeById(Long id);
 
+    CaseTreeNode findTreeByCaseId(String case_id);
+
     Long findNodeByName(String label,String is_v);
 
     Long findNodeByCaseId(String case_id);

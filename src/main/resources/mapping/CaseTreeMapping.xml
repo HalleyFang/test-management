@@ -69,6 +69,12 @@
         where
         case_id=#{case_id}
     </select>
+    <select id="findTreeByCaseId" resultType="com.testmanage.entity.CaseTreeNode">
+        select * from
+        <include refid="table"></include>
+        where
+        case_id=#{case_id}
+    </select>
 
 
 </mapper>

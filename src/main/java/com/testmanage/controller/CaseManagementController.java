@@ -7,6 +7,7 @@ import com.testmanage.entity.ExcelCase;
 import com.testmanage.service.CaseBodyToInfo;
 import com.testmanage.service.CaseInfoService;
 import com.testmanage.service.CaseTreeService;
+import com.testmanage.service.TaskCaseService;
 import com.testmanage.service.user.UserContext;
 import com.testmanage.utils.ExcelUtils;
 import com.testmanage.utils.JsonParse;
@@ -42,6 +43,9 @@ public class CaseManagementController {
     @Autowired
     CaseTreeService caseTreeService;
 
+    @Autowired
+    TaskCaseService taskCaseService;
+
     @RequestMapping(path = "/add", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")
     public void addCase(@RequestBody String body, HttpServletResponse resp) throws Exception {
@@ -62,6 +66,7 @@ public class CaseManagementController {
     @RequestMapping(path = "/delete", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")
     public void deleteCase(@RequestParam String caseId, HttpServletResponse resp) throws Exception {
+        taskCaseService.deleteCaseById(caseId);
         caseInfoService.deleteCase(caseId);
         caseTreeService.deleteTree(caseId);
     }
@@ -83,12 +88,6 @@ public class CaseManagementController {
             outputStream.write(dataByteArr);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                outputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
         return null;
     }
@@ -110,18 +109,12 @@ public class CaseManagementController {
             outputStream.write(dataByteArr);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                outputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
         return null;
     }
 
     @RequestMapping(path = "/importExcel", method = RequestMethod.POST)
-    public void importExcel(@RequestBody MultipartFile file) {
+    public void importExcel(@RequestBody MultipartFile file,HttpServletResponse response) throws IOException {
         try {
             InputStream inputStream = file.getInputStream();
             ExcelUtils<ExcelCase> excelUtil = new ExcelUtils<>(ExcelCase.class);
@@ -144,11 +137,16 @@ public class CaseManagementController {
                 caseInfo.setCreate_date(new Date());
                 caseInfosInsert.add(caseInfo);
             }
-            caseInfoService.addCase(caseInfosInsert);
-            caseTreeService.addTree(caseInfosInsert);
-            caseInfoService.updateCase(caseInfosUpdate);
+            if(caseInfosInsert.size()>0) {
+                caseInfoService.addCase(caseInfosInsert);
+                caseTreeService.addTree(caseInfosInsert);
+            }
+            if(caseInfosUpdate.size()>0) {
+                caseInfoService.updateCase(caseInfosUpdate);
+                caseTreeService.updateTreeLabel(caseInfosUpdate);
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            response.sendError(500);
         }
 
     }

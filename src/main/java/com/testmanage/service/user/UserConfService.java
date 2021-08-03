@@ -27,4 +27,5 @@ public class UserConfService {
     public String getAvatar(String username){
         return userConfMapper.getParameter(username,"avatar");
     }
+
 }

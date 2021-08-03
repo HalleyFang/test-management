@@ -40,12 +40,6 @@ public class CaseTreeController {
             outputStream.write(dataByteArr);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                outputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
         return null;
     }
@@ -131,12 +125,6 @@ public class CaseTreeController {
             outputStream.write(dataByteArr);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                outputStream.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
         return null;
     }

@@ -24,6 +24,12 @@
         where
         task_id=#{task_id} and case_id=#{case_id}
     </delete>
+    <delete id="deleteCaseById">
+        delete from
+        <include refid="table"></include>
+        where
+        case_id=#{case_id}
+    </delete>
     <select id="findByTaskId" resultType="com.testmanage.entity.TaskCase">
         select * from
         <include refid="table"></include>

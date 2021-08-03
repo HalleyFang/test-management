@@ -1,19 +1,18 @@
 package com.testmanage.service.user;
 
 import com.testmanage.entity.MyUser;
-import com.testmanage.entity.UserConf;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.ws.Action;
+import java.io.IOException;
 
 @Component
 @Slf4j
@@ -28,6 +27,22 @@ public class UserHandler implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object object) {
         String path = request.getRequestURI();
+        /*if(path.startsWith("/api/")){
+            path = path.substring(4);
+            try {
+                request.getRequestDispatcher(path).forward(request,response);
+            } catch (ServletException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
+        }
+        */
+
+        if(path.equalsIgnoreCase("/auth/login")){
+            return true;
+        }
         try {
             Subject subject = SecurityUtils.getSubject();
             String username = subject.getPrincipal().toString();
@@ -48,7 +63,6 @@ public class UserHandler implements HandlerInterceptor {
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object object, ModelAndView mv)
             throws Exception {
-
     }
 
     /**

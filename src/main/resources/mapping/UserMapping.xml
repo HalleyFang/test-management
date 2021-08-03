@@ -16,7 +16,24 @@
         where
         t.username=#{username} and c.parameter='isV'
     </select>
-    <select id="getAllUser" resultType="com.testmanage.entity.MyUser"></select>
+    <select id="getAllUser" resultType="com.testmanage.entity.MyUser">
+        select t.*,c.value from
+        <include refid="table"></include> t
+        left join
+        <include refid="conf"></include> c
+        on t.username=c.username
+        where
+        c.parameter='isV'
+    </select>
+    <select id="getAllUserIgnore" resultType="com.testmanage.entity.MyUser">
+        select t.*,c.value from
+        <include refid="table"></include> t
+        left join
+        <include refid="conf"></include> c
+        on t.username=c.username
+        where
+        t.username != #{username} and c.parameter='isV'
+    </select>
 
 
 </mapper>

@@ -59,13 +59,29 @@ public class CaseInfoService {
     }
 
     public void addCase(List<CaseInfo> caseInfos) {
-        caseInfoMapper.insertCaseBatch(caseInfos);
+        if (caseInfos.size()>0) {
+            caseInfoMapper.insertCaseBatch(caseInfos);
+        }
     }
 
-    public void updateCase(CaseInfo caseInfo) {
+    public void updateCase(CaseInfo caseInfo) throws Exception {
         caseInfo.setUpdate_user(UserContext.get().getUsername());
         caseInfo.setUpdate_date(new Date());
         caseInfoMapper.updateCase(caseInfo);
+        CaseTreeNode node = caseTreeService.getTreeByCaseId(caseInfo.getCase_id());
+        if(node == null){
+            throw new Exception("更新case对应的tree节点未找到");
+        }
+        String treeLabel = node.getLabel();
+        if((treeLabel ==null || !treeLabel.equalsIgnoreCase(caseInfo.getCase_name()))
+        && caseInfo.getCase_name() != null){
+            CaseTreeNode caseTreeNode = new CaseTreeNode();
+            caseTreeNode.setId(node.getId());
+            caseTreeNode.setLabel(caseInfo.getCase_name());
+            caseTreeNode.setUpdate_user(UserContext.get().getUsername());
+            caseTreeNode.setUpdate_date(new Date());
+            caseTreeService.updateTree(caseTreeNode);
+        }
     }
 
     public void updateCase(List<CaseInfo> caseInfos) {
