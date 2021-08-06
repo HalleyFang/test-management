@@ -30,18 +30,12 @@
         <if test="case_name != null and case_name != ''">
             case_name=#{case_name},
         </if>
-        <if test="case_pre != null and case_pre != ''">
             case_pre=#{case_pre},
-        </if>
         <if test="case_step != null and case_step != ''">
             case_step=#{case_step},
         </if>
-        <if test="case_post != null and case_post != ''">
             case_post=#{case_post},
-        </if>
-        <if test="remark != null and remark != ''">
             remark=#{remark},
-        </if>
         update_user=#{update_user},update_date=#{update_date,jdbcType=TIMESTAMP}
         where
         case_id=#{case_id}

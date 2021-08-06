@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.testmanage.mapper.AutoCaseMapper">
+
+    <sql id="table">autotest_case</sql>
+    <insert id="add">
+        insert into
+        <include refid="table"></include>
+        (case_id,type,content,create_user,create_date)
+        values
+        (#{case_id},#{type},#{content},#{create_user},#{create_date,jdbcType=TIMESTAMP})
+    </insert>
+    <update id="update">
+        update
+        <include refid="table"/>
+        set
+        <if test="type != null">
+            type=#{type},
+        </if>
+        <if test="content != null and content != ''">
+            content=#{content},
+        </if>
+        update_user=#{update_user},update_date=#{update_date,jdbcType=TIMESTAMP}
+        where
+        case_id=#{case_id}
+    </update>
+    <select id="findCaseById" resultType="com.testmanage.entity.AutoCase">
+        select * from
+        <include refid="table"></include>
+        where
+        case_id=#{case_id}
+    </select>
+
+
+</mapper>

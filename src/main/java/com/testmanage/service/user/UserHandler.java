@@ -43,10 +43,13 @@ public class UserHandler implements HandlerInterceptor {
         if(path.equalsIgnoreCase("/auth/login")){
             return true;
         }
+        if(path.equalsIgnoreCase("/addAutoCase")){
+            return true;
+        }
         try {
             Subject subject = SecurityUtils.getSubject();
             String username = subject.getPrincipal().toString();
-            MyUser myUser = new MyUser(0, username, null, null, null,
+            MyUser myUser = new MyUser(username,
                     userConfService.getV(username));
             UserContext.set(myUser);
             return Boolean.TRUE;

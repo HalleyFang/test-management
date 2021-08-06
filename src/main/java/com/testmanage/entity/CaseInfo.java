@@ -24,4 +24,5 @@ public class CaseInfo implements Serializable {
     private String update_user;
     private Date update_date;
     private String is_v;
+    private Boolean is_auto = false;
 }

@@ -8,13 +8,18 @@ import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
+import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.Random;
 
 @Service
 public class CustomRealm extends AuthorizingRealm {
@@ -64,8 +69,14 @@ public class CustomRealm extends AuthorizingRealm {
             //这里返回后会报出对应异常
             return null;
         } else {
+            HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
+            hashedCredentialsMatcher.setHashAlgorithmName("md5");
+            hashedCredentialsMatcher.setHashIterations(1024);
+            this.setCredentialsMatcher(hashedCredentialsMatcher);
             //这里验证authenticationToken和simpleAuthenticationInfo的信息
-            SimpleAuthenticationInfo simpleAuthenticationInfo = new SimpleAuthenticationInfo(name, user.getPassword().toString(), getName());
+            SimpleAuthenticationInfo simpleAuthenticationInfo =
+                    new SimpleAuthenticationInfo(name, user.getPassword(),
+                            ByteSource.Util.bytes(user.getSalt()), this.getName());
             return simpleAuthenticationInfo;
         }
     }

@@ -10,10 +10,7 @@ import com.testmanage.utils.JsonParse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +29,27 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    @PostMapping("/addUser")
+    public void addUser(@RequestBody String body) throws Exception {
+        JsonObject bodyJson = JsonParse.StringToJson(body);
+        MyUser user = JsonParse.getGson().fromJson(bodyJson,MyUser.class);
+        userService.addUser(user);
+    }
+
+    @PostMapping("/updateUser")
+    public void updateUser(@RequestBody String body) throws Exception {
+        JsonObject bodyJson = JsonParse.StringToJson(body);
+        MyUser user = JsonParse.getGson().fromJson(bodyJson,MyUser.class);
+        userService.updateUser(user,null);
+    }
+
+    @PostMapping("/changePassword")
+    public void changePassword(@RequestBody String body) throws Exception {
+        JsonObject bodyJson = JsonParse.StringToJson(body);
+        MyUser user = JsonParse.getGson().fromJson(bodyJson,MyUser.class);
+        userService.updateUser(user,"changePassword");
+    }
 
     @GetMapping("/avatar")
     public void avatar(HttpServletResponse response) throws IOException {

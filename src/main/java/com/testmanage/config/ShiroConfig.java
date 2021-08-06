@@ -1,5 +1,8 @@
-package com.testmanage.service.login;
+package com.testmanage.config;
 
+import com.testmanage.filter.CORSAuthenticationFilter;
+import com.testmanage.service.login.CustomRealm;
+import com.testmanage.service.login.CustomSessionManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
@@ -49,7 +52,6 @@ public class ShiroConfig {
         shiroFilterFactoryBean.setSecurityManager(securityManager);
         Map<String, String> map = new HashMap<>();
         //authc:所有url必须通过认证才能访问，anon:所有url都可以匿名访问
-        map.put("/**", "corsAuthenticationFilter");
         map.put("/css/**", "anon");
         map.put("/login", "anon");
         map.put("/auth/login", "anon");
@@ -57,6 +59,8 @@ public class ShiroConfig {
         map.put("/js/**", "anon");
         map.put("/img/**", "anon");
         map.put("/image/**", "anon");
+        map.put("/addAutoCase","anon");
+        map.put("/**", "corsAuthenticationFilter");
         //登录
         shiroFilterFactoryBean.setLoginUrl("/login");
         //首页

@@ -1,4 +1,4 @@
-package com.testmanage.service.login;
+package com.testmanage.filter;
 
 import org.apache.shiro.web.filter.authc.FormAuthenticationFilter;
 
@@ -39,6 +39,9 @@ public class CORSAuthenticationFilter extends FormAuthenticationFilter {
                 return true;
             }
             if (uri.contains("/logout")) {
+                return true;
+            }
+            if (uri.contains("/addAutoCase")) {
                 return true;
             }
         }

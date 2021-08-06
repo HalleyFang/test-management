@@ -44,12 +44,14 @@
         <include refid="table"></include>
         where
         is_v=#{is_v}
+        order by id
     </select>
     <select id="findTreeByParent" resultType="com.testmanage.entity.CaseTreeNode">
         select * from
         <include refid="table"></include>
         where
         parent_id=#{parent_id} and is_v=#{is_v}
+        order by id
     </select>
     <select id="findTreeById" resultType="com.testmanage.entity.CaseTreeNode">
         select * from

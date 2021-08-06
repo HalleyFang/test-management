@@ -367,7 +367,7 @@ public class CaseTreeService {
         if(treeId.size()==0){
             throw new Exception("请关联用例");
         }
-        Map<Long,List<Long>> map = new HashMap<>();//父节点和子节点对应关系
+        Map<Long,List<Long>> map = new LinkedHashMap<>();//父节点和子节点对应关系
         for(Long tId : treeId){
             Long parentId = 0L;
             if(tId!=0L){

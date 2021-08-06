@@ -4,32 +4,66 @@
 
     <sql id="table">my_user</sql>
     <sql id="conf">user_conf</sql>
-    <insert id="addUser"></insert>
-    <update id="updateUser"></update>
-    <delete id="deleteUser"></delete>
+    <insert id="addUser">
+        insert into
+        <include refid="table"></include>
+        values
+        (#{id},#{username},#{password},#{roles},#{permissions},#{salt})
+    </insert>
+    <update id="updateUser">
+        update
+        <include refid="table"></include>
+        set
+        <if test="password != null and password != ''">
+            password = #{password},
+        </if>
+        <if test="roles != null">
+            roles = #{roles},
+        </if>
+        <if test="permissions != null">
+            permissions = #{permissions},
+        </if>
+        <if test="salt != null and salt != ''">
+            salt = #{salt}
+        </if>
+        where
+        username = #{username}
+    </update>
+    <delete id="deleteUser">
+        delete from
+        <include refid="table"></include>
+        where
+        username = #{username}
+    </delete>
     <select id="getUserByName" resultType="com.testmanage.entity.MyUser">
         select t.*,c.value as isV from
-        <include refid="table"></include> t
+        <include refid="table"></include>
+        t
         left join
-        <include refid="conf"></include> c
+        <include refid="conf"></include>
+        c
         on t.username=c.username
         where
         t.username=#{username} and c.parameter='isV'
     </select>
     <select id="getAllUser" resultType="com.testmanage.entity.MyUser">
         select t.*,c.value from
-        <include refid="table"></include> t
+        <include refid="table"></include>
+        t
         left join
-        <include refid="conf"></include> c
+        <include refid="conf"></include>
+        c
         on t.username=c.username
         where
         c.parameter='isV'
     </select>
     <select id="getAllUserIgnore" resultType="com.testmanage.entity.MyUser">
         select t.*,c.value from
-        <include refid="table"></include> t
+        <include refid="table"></include>
+        t
         left join
-        <include refid="conf"></include> c
+        <include refid="conf"></include>
+        c
         on t.username=c.username
         where
         t.username != #{username} and c.parameter='isV'

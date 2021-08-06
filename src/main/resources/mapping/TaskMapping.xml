@@ -58,6 +58,12 @@
         where
         label=#{label} and is_v=#{is_v}
     </select>
+    <select id="findAllUserTask" resultType="com.testmanage.entity.Task">
+        select * from
+        <include refid="table"></include>
+        where
+        executor=#{executor} and is_v=#{is_v}
+    </select>
 
 
 </mapper>

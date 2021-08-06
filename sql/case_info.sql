@@ -1,18 +1,18 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : local pg
+ Source Server         : 25pg
  Source Server Type    : PostgreSQL
- Source Server Version : 90506
- Source Host           : localhost:5432
- Source Catalog        : postgres
+ Source Server Version : 90420
+ Source Host           : 192.168.0.25:5432
+ Source Catalog        : testm
  Source Schema         : public
 
  Target Server Type    : PostgreSQL
- Target Server Version : 90506
+ Target Server Version : 90420
  File Encoding         : 65001
 
- Date: 23/07/2021 17:53:05
+ Date: 03/08/2021 14:52:26
 */
 
 
@@ -35,10 +35,7 @@ CREATE TABLE "public"."case_info" (
   "update_user" varchar COLLATE "pg_catalog"."default",
   "update_date" timestamp(6),
   "issue_id" varchar COLLATE "pg_catalog"."default",
-  "is_v" varchar COLLATE "pg_catalog"."default"
+  "is_v" varchar COLLATE "pg_catalog"."default",
+  "is_auto" bool
 )
 ;
-
--- ----------------------------
--- Records of case_info
--- ----------------------------

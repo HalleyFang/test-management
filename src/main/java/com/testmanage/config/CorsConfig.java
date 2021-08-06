@@ -1,4 +1,4 @@
-package com.testmanage.service.login;
+package com.testmanage.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -16,6 +16,8 @@ public interface TaskMapper {
 
     List<Task> findAllTask(String is_v);
 
+    List<Task> findAllUserTask(String executor,String is_v);
+
     Task findTaskById(Long id);
 
     Task findTaskByLabel(String label,String is_v);
