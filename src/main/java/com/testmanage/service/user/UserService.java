@@ -63,10 +63,8 @@ public class UserService {
         MyUser u = getUserByName(user.getUsername());
         if(u instanceof MyUser) {
             if(!StringUtils.isEmpty(type) && type.equalsIgnoreCase("changePassword")) {
-                Md5Hash md5Hash = new Md5Hash(user.getPassword());
                 String salt = RandomString.randomAlphabetic(8);
-                md5Hash.setSalt(ByteSource.Util.bytes(salt));
-                md5Hash.setIterations(1024);
+                Md5Hash md5Hash = new Md5Hash(user.getPassword(),ByteSource.Util.bytes(salt),1024);
                 user.setPassword(md5Hash.toHex());
                 user.setSalt(salt);
             }else {

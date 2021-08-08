@@ -77,6 +77,13 @@
         where
         case_id=#{case_id}
     </select>
+    <select id="findTreeByParentAndDir" resultType="com.testmanage.entity.CaseTreeNode">
+        select * from
+        <include refid="table"></include>
+        where
+        parent_id=#{parent_id} and is_v=#{is_v} and is_dir=#{is_dir}
+        order by id
+    </select>
 
 
 </mapper>

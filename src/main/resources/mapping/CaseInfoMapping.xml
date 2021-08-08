@@ -20,7 +20,7 @@
         <foreach collection ="caseInfos" item="caseInfo" index= "index" separator =",">
         (#{caseInfo.id},#{caseInfo.case_id},#{caseInfo.case_name},#{caseInfo.case_pre},#{caseInfo.case_step},#{caseInfo.case_post},
         #{caseInfo.remark},#{caseInfo.create_user},#{caseInfo.create_date,jdbcType=TIMESTAMP},#{caseInfo.is_v})
-        </foreach >
+        </foreach>
     </insert>
 
     <update id="updateCase" parameterType="com.testmanage.entity.CaseInfo">
@@ -103,5 +103,11 @@
         <include refid="table"/>
         where
         case_name=#{case_name} and is_v=#{is_v}
+    </select>
+    <select id="findTotalCount" resultType="java.lang.Integer">
+        select count(*) from
+        <include refid="table"></include>
+        where
+        is_v=#{is_v}
     </select>
 </mapper>

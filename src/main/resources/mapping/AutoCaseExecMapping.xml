@@ -42,6 +42,34 @@
         where
         exec_id=#{exec_id} and case_id=#{case_id} and exec_parameter=#{exec_parameter}
     </select>
+    <select id="findExecId" resultType="java.lang.Long">
+        SELECT exec_id FROM
+        <include refid="table"></include>
+        group by exec_id
+        order by exec_id desc
+    </select>
+    <select id="findCaseExecByExecId" resultType="com.testmanage.entity.AutoCaseExec">
+        select * from
+        <include refid="table"></include>
+        where
+        exec_id = #{exec_id}
+        order by exec_id desc
+    </select>
+    <select id="findCaseExecByCaseId" resultType="com.testmanage.entity.AutoCaseExec">
+        select * from
+        <include refid="table"></include>
+        where
+        case_id=#{case_id} and exec_parameter=#{exec_parameter}
+        order by exec_id desc
+    </select>
+    <select id="findALL" resultType="com.testmanage.entity.AutoCaseExec">
+        select t.* from
+        <include refid="table"></include> t
+        left join case_info c
+        on t.case_id=c.case_id
+        where c.is_v=#{is_v}
+        order by t.exec_id desc
+    </select>
 
 
 </mapper>

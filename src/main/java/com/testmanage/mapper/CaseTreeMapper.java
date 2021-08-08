@@ -16,6 +16,8 @@ public interface CaseTreeMapper {
 
     List<CaseTreeNode> findTreeByParent(Long parent_id,String is_v);
 
+    List<CaseTreeNode> findTreeByParentAndDir(Long parent_id,Boolean is_dir,String is_v);
+
     CaseTreeNode findTreeById(Long id);
 
     CaseTreeNode findTreeByCaseId(String case_id);

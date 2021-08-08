@@ -11,4 +11,6 @@ public interface AutoCaseMapper {
     void update(AutoCase autoCase);
 
     AutoCase findCaseById(String case_id);
+
+    Integer queryCaseCount(String is_v);
 }

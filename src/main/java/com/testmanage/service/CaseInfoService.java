@@ -101,6 +101,11 @@ public class CaseInfoService {
         return caseInfoMapper.findByCaseId(caseId);
     }
 
+    public Integer queryCaseTotal() {
+        return caseInfoMapper.findTotalCount(UserContext.get().getIsV());
+    }
+
+
     public CaseInfo queryCaseByName(String caseName) {
         return caseInfoMapper.findByCaseName(caseName, UserContext.get().getIsV());
     }

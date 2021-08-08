@@ -29,4 +29,6 @@ public interface CaseInfoMapper {
 
     List<CaseInfo> findByCreateUser();
 
+    Integer findTotalCount(String is_v);
+
 }

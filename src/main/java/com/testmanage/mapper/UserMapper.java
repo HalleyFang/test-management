@@ -8,9 +8,9 @@ import java.util.List;
 @Mapper
 public interface UserMapper {
 
-    MyUser addUser(MyUser user);
-    MyUser updateUser(MyUser user);
-    MyUser deleteUser(MyUser user);
+    void addUser(MyUser user);
+    void updateUser(MyUser user);
+    void deleteUser(MyUser user);
     MyUser getUserByName(String username);
     List<MyUser> getAllUser();
     List<MyUser> getAllUserIgnore(String username);

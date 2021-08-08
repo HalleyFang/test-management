@@ -4,10 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.testmanage.entity.CaseInfo;
 import com.testmanage.entity.ExcelCase;
-import com.testmanage.service.CaseBodyToInfo;
-import com.testmanage.service.CaseInfoService;
-import com.testmanage.service.CaseTreeService;
-import com.testmanage.service.TaskCaseService;
+import com.testmanage.service.*;
 import com.testmanage.service.user.UserContext;
 import com.testmanage.utils.ExcelUtils;
 import com.testmanage.utils.JsonParse;
@@ -21,6 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,6 +44,9 @@ public class CaseManagementController {
 
     @Autowired
     TaskCaseService taskCaseService;
+
+    @Autowired
+    AutoCaseService autoCaseService;
 
     @RequestMapping(path = "/add", method = RequestMethod.POST,
             produces = "application/json;charset=UTF-8")
@@ -149,6 +151,31 @@ public class CaseManagementController {
             response.sendError(500);
         }
 
+    }
+
+    @GetMapping("/caseTotal")
+    public HttpServletResponse caseTotal(HttpServletResponse response){
+        response.setHeader("content-type", "application/json;charset=UTF-8");
+        JsonObject jsonObject = new JsonObject();
+        Integer total = caseInfoService.queryCaseTotal();
+        Double autoCount = Double.valueOf(autoCaseService.queryCaseCount());
+        Double auto = 0.00;
+        if(total!=0){
+            BigDecimal bigDecimal= new BigDecimal((autoCount/total)*100);
+            auto = bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+        }
+        jsonObject.addProperty("total",total);
+        jsonObject.addProperty("auto",auto);
+        String data = JsonParse.JsonToString(jsonObject);
+        OutputStream outputStream = null;
+        try {
+            outputStream = response.getOutputStream();
+            byte[] dataByteArr = data.getBytes("UTF-8");
+            outputStream.write(dataByteArr);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

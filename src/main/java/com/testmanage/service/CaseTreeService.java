@@ -1,6 +1,7 @@
 package com.testmanage.service;
 
 import com.google.gson.*;
+import com.testmanage.entity.AutoCase;
 import com.testmanage.entity.CaseInfo;
 import com.testmanage.entity.CaseTreeNode;
 import com.testmanage.entity.TaskCase;
@@ -14,8 +15,10 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
 
@@ -32,7 +35,13 @@ public class CaseTreeService {
     @Autowired
     TaskCaseService taskCaseService;
 
-    @CacheEvict(value = "tree")
+    @Autowired
+    CaseInfoService caseInfoService;
+
+    @Autowired
+    AutoCaseService autoCaseService;
+
+    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void addTree(JsonObject treeJson) throws Exception {
         Map<String, Object> resultMap = analysisTreeJson(treeJson);
         if (!idIsExist((Long) resultMap.get("id"))) {
@@ -53,7 +62,7 @@ public class CaseTreeService {
 
     }
 
-    @CacheEvict(value = "tree")
+    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void addTree(Map<String, Object> map) throws Exception {
         CaseTreeNode node = (CaseTreeNode) map.get("currentNode");
         Long id = node.getId();
@@ -99,7 +108,7 @@ public class CaseTreeService {
 
     }
 
-    @CacheEvict(value = "tree")
+    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void addTree(List<CaseInfo> list){
         Set<String> parent = new HashSet<>();
         for (CaseInfo caseInfo : list){
@@ -153,7 +162,7 @@ public class CaseTreeService {
         }
     }
 
-    @CacheEvict(value = "tree")
+    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void deleteTree(Long id) {
         CaseTreeNode currentNode = caseTreeMapper.findTreeById(id);
         if (currentNode != null) {
@@ -195,18 +204,18 @@ public class CaseTreeService {
         }
     }
 
-    @CacheEvict(value = "tree")
+    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void deleteTree(String caseId) {
         Long id = caseTreeMapper.findNodeByCaseId(caseId);
         deleteTree(id);
     }
 
-    @CacheEvict(value = "tree")
+    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void updateTree(CaseTreeNode caseTreeNode) throws Exception {
         caseTreeMapper.updateTree(caseTreeNode);
     }
 
-        @CacheEvict(value = "tree")
+    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void updateTree(JsonObject treeJson) throws Exception {
         Map<String, Object> resultMap = analysisTreeJson(treeJson);
         CaseTreeNode currentNode = (CaseTreeNode) resultMap.get("currentNode");
@@ -316,6 +325,9 @@ public class CaseTreeService {
         }
         for (CaseTreeNode node : treeNodeList) {
             if (node.getIs_dir() && !node.getIs_delete()) {
+                Map<String,Object> totalCount = getCaseTotal(node.getId());
+                Integer total = totalCount.get("total") == null ? 0 : (Integer) totalCount.get("total");
+                Double auto = totalCount.get("auto") == null ? 0.00 : (Double) totalCount.get("auto");
                 if (parentId == 0) {
                     //根节点
                     jsonObject = new JsonObject();
@@ -324,6 +336,8 @@ public class CaseTreeService {
                     jsonObject.addProperty("is_dir", true);
                     jsonObject.addProperty("icon", "el-icon-folder");
                     jsonObject.addProperty("status", 0);
+                    jsonObject.addProperty("total",total);
+                    jsonObject.addProperty("auto",auto);
                     JsonArray j = new JsonArray();
                     jsonObject.add("children", j);
                     map = new HashMap<>();
@@ -337,6 +351,8 @@ public class CaseTreeService {
                     j2.addProperty("is_dir", true);
                     j2.addProperty("icon", "el-icon-folder");
                     j2.addProperty("status", 0);
+                    j2.addProperty("total",total);
+                    j2.addProperty("auto",auto);
                     JsonArray j = new JsonArray();
                     j2.add("children", j);
                     jsonArray.add(j2);
@@ -348,13 +364,85 @@ public class CaseTreeService {
                 JsonArray jsonArray = map.get(parentId).getAsJsonArray();//对children对象进行修改
                 String str = JsonParse.getGson().toJson(node);
                 JsonObject nodeJson = JsonParse.StringToJson(str);
+                CaseInfo caseInfo = caseInfoService.queryCase(node.getCase_id());
+                Boolean isAuto = false;
+                if(caseInfo instanceof CaseInfo){
+                    isAuto = caseInfo.getIs_auto();
+                }
                 nodeJson.addProperty("icon", "el-icon-tickets");
+                nodeJson.addProperty("isAuto", isAuto);
                 jsonArray.add(nodeJson);
             }
             treeJson.add(jsonObject);//只关心最终结果，将jsonObject加入结果
         }
 
         return treeJson.toString();
+    }
+
+    private Map<String,Object> getCaseTotal(Long id){
+        Map<Long,Map<String,Integer>> idMap = getCaseTotalCount();
+        Map<String,Integer> map = idMap.get(id);
+        Integer total = map.get("total") == null ? 0 :map.get("total");
+        Integer autoTmp = map.get("auto") == null ? 0 :map.get("auto");
+        Double autoCount = Double.valueOf(autoTmp);
+        Double auto = 0.00;
+        if(total!=0){
+            BigDecimal bigDecimal= new BigDecimal((autoCount/total)*100);
+            auto = bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+        }
+        Map<String,Object> result = new HashMap<>();
+        result.put("total",total);
+        result.put("auto",auto);
+        return result;
+    }
+
+    @Cacheable("totalCount")
+    private Map<Long, Map<String, Integer>> getCaseTotalCount(){
+        return getCaseTotalCount(0L,null);
+    }
+
+    private Map<Long, Map<String, Integer>> getCaseTotalCount(Long id,Map<Long, Map<String, Integer>> recordMap){
+        if(recordMap==null){
+            recordMap = new HashMap<>();
+        }
+        List<CaseTreeNode> listDir = caseTreeMapper.findTreeByParentAndDir(id,true,UserContext.get().getIsV());
+        for(CaseTreeNode node:listDir){
+            getCaseTotalCount(node.getId(),recordMap);
+        }
+        List<CaseTreeNode> listCase = caseTreeMapper.findTreeByParentAndDir(id,false,UserContext.get().getIsV());
+        Map<String,Integer> mapCount = recordMap.get(id);
+        if(mapCount==null){
+            mapCount = new HashMap<>();
+        }
+        Integer total = mapCount.get("total") == null ? 0 :mapCount.get("total");
+        total += listCase.size();
+        mapCount.put("total",total);
+        Integer auto = mapCount.get("auto") == null ? 0 :mapCount.get("auto");
+        for(CaseTreeNode node:listCase){
+            String caseId = node.getCase_id();
+            if(!StringUtils.isEmpty(caseId)) {
+                AutoCase autoCase = autoCaseService.findCaseById(caseId);
+                if(autoCase instanceof AutoCase){
+                    auto++;
+                }
+            }
+        }
+        mapCount.put("auto",auto);
+        if(id>0) {
+            recordMap.put(id,mapCount);//记录结果，0除外
+            //如果有parent，则要把结果加到parent;0是根节点除外
+            CaseTreeNode node = caseTreeMapper.findTreeById(id);
+            Long toId = node.getParent_id();
+            Integer parentTotal = recordMap.get(toId) == null ? 0 : recordMap.get(toId).get("total");
+            Integer parentAuto = recordMap.get(toId) == null ? 0 : recordMap.get(toId).get("auto");
+            parentTotal += total;
+            parentAuto += auto;
+            Map<String,Integer> toCount = new HashMap<>();
+            toCount.put("total",parentTotal);
+            toCount.put("auto",parentAuto);
+            recordMap.put(toId,toCount);
+        }
+        return recordMap;
     }
 
 

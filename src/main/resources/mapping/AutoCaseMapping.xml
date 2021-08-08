@@ -3,6 +3,7 @@
 <mapper namespace="com.testmanage.mapper.AutoCaseMapper">
 
     <sql id="table">autotest_case</sql>
+    <sql id="caseInfo">case_info</sql>
     <insert id="add">
         insert into
         <include refid="table"></include>
@@ -29,6 +30,14 @@
         <include refid="table"></include>
         where
         case_id=#{case_id}
+    </select>
+    <select id="queryCaseCount" resultType="java.lang.Integer">
+        select count(*) from
+        <include refid="table"></include> t
+        left join
+        <include refid="caseInfo"></include> c
+        on t.case_id=c.case_id
+        where c.is_v = #{is_v}
     </select>
 
 
