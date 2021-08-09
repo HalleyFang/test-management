@@ -1,5 +1,6 @@
 package com.testmanage.controller;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.testmanage.service.AutoCaseService;
 import com.testmanage.utils.JsonParse;
@@ -26,16 +27,40 @@ public class AutoCaseController {
         autoCaseService.addAndUpdateCase(bodyJson);
     }
 
-
     @GetMapping("/drawColumnChart")
-    public void drawColumnChart(HttpServletResponse response){
-
+    public HttpServletResponse drawColumnChart(HttpServletResponse response){
+        JsonObject jsonObject =  autoCaseService.drawColumnChart();
+        String data = JsonParse.JsonToString(jsonObject);
+        OutputStream outputStream = null;
+        try {
+            outputStream = response.getOutputStream();
+            byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
+            outputStream.write(bytes);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @GetMapping("/drawScatterChart")
     public HttpServletResponse drawScatterChart(HttpServletResponse response) {
         JsonObject jsonObject = autoCaseService.drawScatterChart();
         String data = JsonParse.JsonToString(jsonObject);
+        OutputStream outputStream = null;
+        try {
+            outputStream = response.getOutputStream();
+            byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
+            outputStream.write(bytes);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @GetMapping("/recentExec")
+    public HttpServletResponse recentExec(HttpServletResponse response){
+        JsonArray jsonArray = autoCaseService.getRecentExec();
+        String data = JsonParse.getGson().toJson(jsonArray);
         OutputStream outputStream = null;
         try {
             outputStream = response.getOutputStream();

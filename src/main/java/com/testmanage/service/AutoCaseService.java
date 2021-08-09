@@ -3,6 +3,7 @@ package com.testmanage.service;
 import com.google.gson.*;
 import com.testmanage.entity.AutoCase;
 import com.testmanage.entity.AutoCaseExec;
+import com.testmanage.entity.ColumnChart;
 import com.testmanage.entity.ScatterChart;
 import com.testmanage.mapper.AutoCaseExecMapper;
 import com.testmanage.mapper.AutoCaseMapper;
@@ -106,9 +107,159 @@ public class AutoCaseService {
     }
 
 
-    public void drawColumnChart() {
+    public synchronized JsonObject drawColumnChart() {
+        //统计最近15次，统计4个小时前开始（因为正在执行的任务暂时不统计）
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.HOUR_OF_DAY, (c.get(Calendar.HOUR_OF_DAY) - 4));
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        Long baseExecId = Long.valueOf(simpleDateFormat.format(c.getTime()));
+        List<Long> execIdList = autoCaseExecMapper.findExecId();
+        List<Long> showList = new ArrayList<>();//展示的从4小时前15条记录
+        if(execIdList.size()==0){
+            return null;
+        }
+        for (int i = 0; i < execIdList.size(); i++) {
+            if (execIdList.get(i) >= baseExecId) {
+                continue;
+            }else {
+                if (showList.size() < 15) {
+                    showList.add(execIdList.get(i));
+                }
+            }
+        }
+        if(showList.size()<=1){
+            return null;
+        }
+        Long minId = showList.get(showList.size()-1);
+        Long maxId = showList.get(0);
+        List<ColumnChart> countList =
+                autoCaseExecMapper.findColumnChart(UserContext.get().getIsV(),minId,maxId);
+        Map<Long,Integer> totalMap = new HashMap<>();
+        Map<Long,Integer> successMap = new HashMap<>();
+        Map<Long,Integer> failedMap = new HashMap<>();
+        Map<Long,Integer> skipMap = new HashMap<>();
+        Map<Long,Long> timeMap = new HashMap<>();
 
+        Date minDate = null;
+        Date maxDate = null;
+        for(int j=0;j<countList.size();j++){
+            ColumnChart columnChart = countList.get(j);
+            Long execId = columnChart.getExec_id();
+            Integer count = columnChart.getTotal();
+            Integer status = columnChart.getStatus();
+            Date min = columnChart.getMin_start_date();
+            Date max = columnChart.getMax_end_date();
+            if(totalMap.containsKey(execId)){
+                Integer total = totalMap.get(execId) + count;
+                totalMap.put(execId,total);
+            }else {
+                totalMap.put(execId,count);
+            }
+            if(status==1){
+                successMap.put(execId,count);
+            }else if(status==3){
+                skipMap.put(execId,count);
+            }else {
+                if(failedMap.containsKey(execId)){
+                    Integer fCount = failedMap.get(execId) + count;
+                    failedMap.put(execId,fCount);
+                }else {
+                    failedMap.put(execId,count);
+                }
+            }
+
+            if(!timeMap.containsKey(execId)){
+                if(j>0) {
+                    Long time = 0L;
+                    if(minDate instanceof Date && maxDate instanceof Date) {
+                        time = (maxDate.getTime() - minDate.getTime())/60000;
+                    }
+                    Long idTmp;
+                    idTmp = countList.get(j - 1).getExec_id();
+                    timeMap.put(idTmp,time);
+                }
+                minDate = null;
+                maxDate = null;
+            }
+            if(min!=null){
+                if(minDate==null || min.getTime()<minDate.getTime()){
+                    minDate=min;
+                }
+            }
+
+            if(max!=null){
+                if(maxDate==null || max.getTime()>maxDate.getTime()){
+                    maxDate=max;
+                }
+            }
+
+            if(j==countList.size()){
+                Long time = 0L;
+                if(minDate instanceof Date && maxDate instanceof Date) {
+                    time = (maxDate.getTime() - minDate.getTime())/60000;
+                }
+                timeMap.put(execId,time);
+            }
+        }
+        List<Integer> totalList = new ArrayList<>();
+        List<Integer> successList = new ArrayList<>();
+        List<Integer> failedList = new ArrayList<>();
+        List<Integer> skipList = new ArrayList<>();
+        List<Long> timeList = new ArrayList<>();
+        for(Long id:showList){
+            totalList.add(totalMap.get(id));
+            successList.add(successMap.get(id));
+            failedList.add(failedMap.get(id));
+            skipList.add(skipMap.get(id));
+            timeList.add(timeMap.get(id));
+        }
+        JsonArray xData = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(showList), JsonArray.class);
+        JsonArray timeData = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(timeList), JsonArray.class);
+        JsonArray totalData = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(totalList), JsonArray.class);
+        JsonArray successData = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(successList), JsonArray.class);
+        JsonArray failedData = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(failedList), JsonArray.class);
+        JsonArray skipData = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(skipList), JsonArray.class);
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.add("xData",xData);
+        jsonObject.add("timeData",timeData);
+        jsonObject.add("totalData",totalData);
+        jsonObject.add("successData",successData);
+        jsonObject.add("failedData",failedData);
+        jsonObject.add("skipData",skipData);
+        return jsonObject;
     }
+
+    public synchronized JsonArray getRecentExec(){
+        //统计4个小时内
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.HOUR_OF_DAY, (c.get(Calendar.HOUR_OF_DAY) - 4));
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        Long baseExecId = Long.valueOf(simpleDateFormat.format(c.getTime()));
+        List<Long> execIdList = autoCaseExecMapper.findExecId();
+        List<Long> showList = new ArrayList<>();//展示的从4小时前15条记录
+        if(execIdList.size()==0){
+            return null;
+        }
+        for (int i = 0; i < execIdList.size(); i++) {
+            if (execIdList.get(i) < baseExecId) {
+                continue;
+            }else {
+                showList.add(execIdList.get(i));
+            }
+        }
+        if(showList.size()==0){
+            return null;
+        }
+        JsonArray jsonArray = new JsonArray();
+            List<ColumnChart> execs = autoCaseExecMapper.findColumnChart(UserContext.get().getIsV(),
+                    showList.get(showList.size()-1),showList.get(0));
+            for(ColumnChart columnChart:execs){
+                jsonArray.add(JsonParse.getGson().toJson(columnChart));
+            }
+
+        return jsonArray;
+    }
+
 
     public synchronized JsonObject drawScatterChart() {
         //统计4个小时前开始（因为正在执行的任务暂时不统计）
