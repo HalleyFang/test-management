@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -44,7 +43,8 @@ public class AutoCaseService {
         }
         AutoCaseExec autoCaseExec = addExec(bodyJson);
         AutoCaseExec currentCaseExec = autoCaseExecMapper
-                .findCaseExecById(autoCaseExec.getExec_id(), autoCaseExec.getCase_id(), autoCaseExec.getExec_parameter());
+                .findCaseExecById(autoCaseExec.getExec_id(), autoCaseExec.getCase_id(),
+                        autoCaseExec.getExec_parameter());
         if (currentCaseExec instanceof AutoCaseExec) {
             //update
             if (!JsonParse.getGson().toJson(autoCaseExec)
@@ -110,7 +110,7 @@ public class AutoCaseService {
 
     }
 
-    public synchronized JsonObject drawScatterChart(){
+    public synchronized JsonObject drawScatterChart() {
         //统计4个小时前开始（因为正在执行的任务暂时不统计）
         Calendar c = Calendar.getInstance();
         c.set(Calendar.HOUR_OF_DAY, (c.get(Calendar.HOUR_OF_DAY) - 4));
@@ -151,28 +151,28 @@ public class AutoCaseService {
 
         //计算完成后从scatter表查询结果
         List<Integer> timelineList = new ArrayList<>();
-        for (int j=0;j<showList.size();j++){
-            timelineList.add(j+1);
+        for (int j = 0; j < showList.size(); j++) {
+            timelineList.add(j + 1);
         }
-        JsonArray timeline = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(timelineList),JsonArray.class);
+        JsonArray timeline = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(timelineList), JsonArray.class);
         Collections.reverse(timelineList);//反转对应series
         List<String> descList = new ArrayList<>();
-        for (Long id:showList){
+        for (Long id : showList) {
             String tm = id.toString();
-            String time = tm.substring(0,4)+"-"+tm.substring(4,6)+"-"+
-                    tm.substring(6,8)+" "+
-                    tm.substring(8,10)+":"+tm.substring(10,12)+":"+tm.substring(12);
+            String time = tm.substring(0, 4) + "-" + tm.substring(4, 6) + "-" +
+                    tm.substring(6, 8) + " " +
+                    tm.substring(8, 10) + ":" + tm.substring(10, 12) + ":" + tm.substring(12);
             descList.add(time);
         }
         List<List<List<Object>>> sList = new ArrayList<>();
         Set<String> caseIdSet = new HashSet<>();
-        for (int i=0;i<showList.size();i++){
+        for (int i = 0; i < showList.size(); i++) {
             List<List<Object>> sListTmp = new ArrayList<>();
             Long id = showList.get(i);
             Integer tl = timelineList.get(i);
             String time = descList.get(i);
             List<ScatterChart> scatterChartList = scatterChartMapper.findByExecId(id);
-            if(scatterChartList.size()>0) {
+            if (scatterChartList.size() > 0) {
                 for (ScatterChart scatterChart : scatterChartList) {
                     List<Object> list = new ArrayList<>();
                     list.add(scatterChart.getExec_time());
@@ -188,12 +188,12 @@ public class AutoCaseService {
         }
         //反转让最新的结果对应在前面
         Collections.reverse(sList);
-        JsonArray series = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(sList),JsonArray.class);
-        JsonArray counties = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(caseIdSet),JsonArray.class);
+        JsonArray series = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(sList), JsonArray.class);
+        JsonArray counties = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(caseIdSet), JsonArray.class);
         JsonObject jsonObject = new JsonObject();
-        jsonObject.add("counties",counties);
-        jsonObject.add("timeline",timeline);
-        jsonObject.add("series",series);
+        jsonObject.add("counties", counties);
+        jsonObject.add("timeline", timeline);
+        jsonObject.add("series", series);
         return jsonObject;
     }
 
@@ -263,7 +263,7 @@ public class AutoCaseService {
                 }
             }
         }
-        if(scatterChartList.size()>0) {
+        if (scatterChartList.size() > 0) {
             //批量插入scatter表
             scatterChartMapper.batchInsert(scatterChartList);
         }
@@ -281,7 +281,8 @@ public class AutoCaseService {
             scatterChart.setExec_time(time);
         }
         Integer total = countMap.get("total") == null ? 0 : Integer.parseInt(countMap.get("total").toString());
-        Integer failedCount = countMap.get("failedCount") == null ? 0 : Integer.parseInt(countMap.get("failedCount").toString());
+        Integer failedCount =
+                countMap.get("failedCount") == null ? 0 : Integer.parseInt(countMap.get("failedCount").toString());
         Double failedRate = 0.00;
         if (total > 0) {
             failedRate = (Double.valueOf(failedCount) / total) * 100;
