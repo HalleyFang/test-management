@@ -8,7 +8,7 @@ public class ScatterChart {
     private Long exec_id;
     private String case_id;
     private String exec_parameter;
-    private Long exec_time;
+    private Long exec_time = 1L;
     private Double failed_rate;
     private Integer exec_total;
     private Integer failed_count;

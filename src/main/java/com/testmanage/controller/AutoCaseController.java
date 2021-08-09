@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 
 @RestController
 public class AutoCaseController {
@@ -32,7 +33,7 @@ public class AutoCaseController {
     }
 
     @GetMapping("/drawScatterChart")
-    public HttpServletResponse drawScatterChart(HttpServletResponse response){
+    public HttpServletResponse drawScatterChart(HttpServletResponse response) {
         JsonObject jsonObject = autoCaseService.drawScatterChart();
         String data = JsonParse.JsonToString(jsonObject);
         OutputStream outputStream = null;

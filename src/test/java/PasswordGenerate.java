@@ -5,7 +5,7 @@ public class PasswordGenerate {
 
     public static void main(String[] args) {
         Md5Hash md5Hash =
-                new Md5Hash("my123", ByteSource.Util.bytes("zWsVzLCE"),1024);
+                new Md5Hash("h12345", ByteSource.Util.bytes("zWsVzLCE"),1024);
         System.out.println(md5Hash.toHex());
     }
 }

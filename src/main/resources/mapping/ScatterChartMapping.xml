@@ -5,12 +5,12 @@
     <insert id="batchInsert">
         insert into
         <include refid="table"/>
-        (exec_id,case_id,exec_parameter,exec_time,failed_rate,exec_total,exec_failed_count,is_v)
+        (exec_id,case_id,exec_parameter,exec_time,failed_rate,exec_total,failed_count,is_v)
         values
         <foreach collection ="scatterCharts" item="scatterChart" index= "index" separator =",">
             (#{scatterChart.exec_id},#{scatterChart.case_id},#{scatterChart.exec_parameter},
             #{scatterChart.exec_time},#{scatterChart.failed_rate},#{scatterChart.exec_total},
-            #{scatterChart.exec_failed_count},#{scatterChart.is_v})
+            #{scatterChart.failed_count},#{scatterChart.is_v})
         </foreach>
     </insert>
     <select id="findByExecId" resultType="com.testmanage.entity.ScatterChart">
