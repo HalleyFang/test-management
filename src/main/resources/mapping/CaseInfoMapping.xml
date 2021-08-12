@@ -7,19 +7,19 @@
     <insert id="insertCase" parameterType="com.testmanage.entity.CaseInfo">
         insert into
         <include refid="table"/>
-        (id,case_id,case_name,case_pre,case_step,case_post,remark,create_user,create_date,is_v)
+        (id,case_id,case_name,case_pre,case_step,case_post,remark,create_user,create_date,is_v,is_auto)
         values
         (#{id},#{case_id},#{case_name},#{case_pre},#{case_step},#{case_post},
-        #{remark},#{create_user},#{create_date,jdbcType=TIMESTAMP},#{is_v});
+        #{remark},#{create_user},#{create_date,jdbcType=TIMESTAMP},#{is_v},#{is_auto});
     </insert>
     <insert id="insertCaseBatch">
         insert into
         <include refid="table"/>
-        (id,case_id,case_name,case_pre,case_step,case_post,remark,create_user,create_date,is_v)
+        (id,case_id,case_name,case_pre,case_step,case_post,remark,create_user,create_date,is_v,is_auto)
         values
-        <foreach collection ="caseInfos" item="caseInfo" index= "index" separator =",">
-        (#{caseInfo.id},#{caseInfo.case_id},#{caseInfo.case_name},#{caseInfo.case_pre},#{caseInfo.case_step},#{caseInfo.case_post},
-        #{caseInfo.remark},#{caseInfo.create_user},#{caseInfo.create_date,jdbcType=TIMESTAMP},#{caseInfo.is_v})
+        <foreach collection="caseInfos" item="caseInfo" index="index" separator=",">
+            (#{caseInfo.id},#{caseInfo.case_id},#{caseInfo.case_name},#{caseInfo.case_pre},#{caseInfo.case_step},#{caseInfo.case_post},
+            #{caseInfo.remark},#{caseInfo.create_user},#{caseInfo.create_date,jdbcType=TIMESTAMP},#{caseInfo.is_v},#{caseInfo.is_auto})
         </foreach>
     </insert>
 
@@ -30,39 +30,41 @@
         <if test="case_name != null and case_name != ''">
             case_name=#{case_name},
         </if>
-            case_pre=#{case_pre},
+        case_pre=#{case_pre},
         <if test="case_step != null and case_step != ''">
             case_step=#{case_step},
         </if>
-            case_post=#{case_post},
-            remark=#{remark},
+        case_post=#{case_post},
+        remark=#{remark},
+        is_auto=#{is_auto},
         update_user=#{update_user},update_date=#{update_date,jdbcType=TIMESTAMP}
         where
         case_id=#{case_id}
     </update>
     <update id="updateCaseBatch">
-        <foreach collection="caseInfos" item="caseInfo"  separator=";">
-        update
-        <include refid="table"/>
-        set
-        <if test="caseInfo.case_name != null and caseInfo.case_name != ''">
-            case_name=#{caseInfo.case_name},
-        </if>
-        <if test="caseInfo.case_pre != null and caseInfo.case_pre != ''">
-            case_pre=#{caseInfo.case_pre},
-        </if>
-        <if test="caseInfo.case_step != null and caseInfo.case_step != ''">
-            case_step=#{caseInfo.case_step},
-        </if>
-        <if test="caseInfo.case_post != null and caseInfo.case_post != ''">
-            case_post=#{caseInfo.case_post},
-        </if>
-        <if test="caseInfo.remark != null and caseInfo.remark != ''">
-            remark=#{caseInfo.remark},
-        </if>
-        update_user=#{caseInfo.update_user},update_date=#{caseInfo.update_date,jdbcType=TIMESTAMP}
-        where
-        case_id=#{caseInfo.case_id}
+        <foreach collection="caseInfos" item="caseInfo" separator=";">
+            update
+            <include refid="table"/>
+            set
+            <if test="caseInfo.case_name != null and caseInfo.case_name != ''">
+                case_name=#{caseInfo.case_name},
+            </if>
+            <if test="caseInfo.case_pre != null and caseInfo.case_pre != ''">
+                case_pre=#{caseInfo.case_pre},
+            </if>
+            <if test="caseInfo.case_step != null and caseInfo.case_step != ''">
+                case_step=#{caseInfo.case_step},
+            </if>
+            <if test="caseInfo.case_post != null and caseInfo.case_post != ''">
+                case_post=#{caseInfo.case_post},
+            </if>
+            <if test="caseInfo.remark != null and caseInfo.remark != ''">
+                remark=#{caseInfo.remark},
+            </if>
+            is_auto=#{is_auto},
+            update_user=#{caseInfo.update_user},update_date=#{caseInfo.update_date,jdbcType=TIMESTAMP}
+            where
+            case_id=#{caseInfo.case_id}
         </foreach>
     </update>
 

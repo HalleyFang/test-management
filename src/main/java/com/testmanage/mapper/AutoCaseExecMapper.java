@@ -15,7 +15,7 @@ public interface AutoCaseExecMapper {
 
     AutoCaseExec findCaseExecById(Long exec_id,String case_id,String exec_parameter);
 
-    List<Long> findExecId();
+    List<Long> findExecId(String is_v);
 
     List<ColumnChart> findColumnChart(String is_v,Long minId,Long maxId);
 

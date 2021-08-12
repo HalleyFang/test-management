@@ -17,26 +17,27 @@
         select * from
         <include refid="table"></include>
         where
-        exec_id = #{exec_id}
+        exec_id = #{exec_id} and is_v=#{is_v}
         order by exec_id desc
     </select>
     <select id="findByCaseId" resultType="com.testmanage.entity.ScatterChart">
         select * from
         <include refid="table"></include>
         where
-        case_id = #{case_id} and exec_parameter = #{exec_parameter}
+        case_id = #{case_id} and exec_parameter = #{exec_parameter} and is_v=#{is_v}
         order by exec_id desc
     </select>
     <select id="findExecId" resultType="java.lang.Long">
         SELECT exec_id FROM
         <include refid="table"></include>
+        where is_v=#{is_v}
         group by exec_id
         order by exec_id desc
     </select>
     <select id="findOneByCaseId" resultType="com.testmanage.entity.ScatterChart">
         SELECT * FROM
         <include refid="table"></include>
-        where case_id=#{case_id}
+        where case_id=#{case_id} and is_v=#{is_v}
         order by exec_id desc
         limit 1
     </select>

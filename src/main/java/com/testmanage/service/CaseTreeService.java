@@ -11,6 +11,7 @@ import com.testmanage.utils.JsonParse;
 import com.testmanage.utils.SequenceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -307,6 +308,7 @@ public class CaseTreeService {
 
     @Cacheable(value = "tree")
     public String getTree() {
+        log.info("Generate Tree by " + UserContext.get().getUsername());
         return generateTree(0L, null, null);
     }
 

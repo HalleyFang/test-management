@@ -1,15 +1,13 @@
 package com.testmanage.service;
 
 import com.google.gson.*;
-import com.testmanage.entity.AutoCase;
-import com.testmanage.entity.AutoCaseExec;
-import com.testmanage.entity.ColumnChart;
-import com.testmanage.entity.ScatterChart;
+import com.testmanage.entity.*;
 import com.testmanage.mapper.AutoCaseExecMapper;
 import com.testmanage.mapper.AutoCaseMapper;
 import com.testmanage.mapper.ScatterChartMapper;
 import com.testmanage.service.user.UserContext;
 import com.testmanage.utils.JsonParse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
+@Slf4j
 public class AutoCaseService {
 
     @Autowired
@@ -29,7 +28,10 @@ public class AutoCaseService {
     @Autowired
     ScatterChartMapper scatterChartMapper;
 
-    public synchronized void addAndUpdateCase(JsonObject bodyJson) {
+    @Autowired
+    CaseInfoService caseInfoService;
+
+    public synchronized void addAndUpdateCase(JsonObject bodyJson) throws Exception {
         AutoCase autoCase = addAuto(bodyJson);
         String case_id = autoCase.getCase_id();
         AutoCase currentCase = autoCaseMapper.findCaseById(case_id);
@@ -41,6 +43,18 @@ public class AutoCaseService {
             }
         } else {
             autoCaseMapper.add(autoCase);
+            //新增时更新一下case_info is_auto，auto case必须要有手工用例存在
+            CaseInfo current = caseInfoService.queryCase(autoCase.getCase_id());
+            if (current instanceof CaseInfo) {
+                CaseInfo caseInfo = new CaseInfo();
+                caseInfo.setCase_id(autoCase.getCase_id());
+                caseInfo.setIs_auto(true);
+                caseInfo.setUpdate_date(new Date());
+                caseInfo.setUpdate_user("Automation");
+                caseInfoService.updateCase(caseInfo);
+            } else {
+                log.error("auto case is not existed , caseId : " + autoCase.getCase_id());
+            }
         }
         AutoCaseExec autoCaseExec = addExec(bodyJson);
         AutoCaseExec currentCaseExec = autoCaseExecMapper
@@ -50,10 +64,11 @@ public class AutoCaseService {
             //update
             if (!JsonParse.getGson().toJson(autoCaseExec)
                     .equalsIgnoreCase(JsonParse.getGson().toJson(currentCaseExec))) {
+                //如果成功的请求在开始的请求之前到，更新开始时间
                 if (currentCaseExec.getCurrent() > autoCaseExec.getCurrent() &&
                         autoCaseExec.getStatus() == 5 &&
                         currentCaseExec.getStart_date() == null) {
-                    autoCaseExec.setStatus(null);
+                    autoCaseExec.setStatus(null);//不更新status
                 }
                 autoCaseExec.setUpdate_date(new Date());
                 autoCaseExecMapper.update(autoCaseExec);
@@ -113,92 +128,93 @@ public class AutoCaseService {
         c.set(Calendar.HOUR_OF_DAY, (c.get(Calendar.HOUR_OF_DAY) - 4));
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         Long baseExecId = Long.valueOf(simpleDateFormat.format(c.getTime()));
-        List<Long> execIdList = autoCaseExecMapper.findExecId();
+        List<Long> execIdList = autoCaseExecMapper.findExecId(UserContext.get().getIsV());
         List<Long> showList = new ArrayList<>();//展示的从4小时前15条记录
-        if(execIdList.size()==0){
+        if (execIdList.size() == 0) {
             return null;
         }
         for (int i = 0; i < execIdList.size(); i++) {
             if (execIdList.get(i) >= baseExecId) {
                 continue;
-            }else {
+            } else {
                 if (showList.size() < 15) {
                     showList.add(execIdList.get(i));
                 }
             }
         }
-        if(showList.size()<=1){
+        if (showList.size() <= 1) {
             return null;
         }
-        Long minId = showList.get(showList.size()-1);
-        Long maxId = showList.get(0);
+        Collections.reverse(showList);
+        Long maxId = showList.get(showList.size() - 1);
+        Long minId = showList.get(0);
         List<ColumnChart> countList =
-                autoCaseExecMapper.findColumnChart(UserContext.get().getIsV(),minId,maxId);
-        Map<Long,Integer> totalMap = new HashMap<>();
-        Map<Long,Integer> successMap = new HashMap<>();
-        Map<Long,Integer> failedMap = new HashMap<>();
-        Map<Long,Integer> skipMap = new HashMap<>();
-        Map<Long,Long> timeMap = new HashMap<>();
+                autoCaseExecMapper.findColumnChart(UserContext.get().getIsV(), minId, maxId);
+        Map<Long, Integer> totalMap = new HashMap<>();
+        Map<Long, Integer> successMap = new HashMap<>();
+        Map<Long, Integer> failedMap = new HashMap<>();
+        Map<Long, Integer> skipMap = new HashMap<>();
+        Map<Long, Long> timeMap = new HashMap<>();
 
         Date minDate = null;
         Date maxDate = null;
-        for(int j=0;j<countList.size();j++){
+        for (int j = 0; j < countList.size(); j++) {
             ColumnChart columnChart = countList.get(j);
             Long execId = columnChart.getExec_id();
             Integer count = columnChart.getTotal();
             Integer status = columnChart.getStatus();
             Date min = columnChart.getMin_start_date();
             Date max = columnChart.getMax_end_date();
-            if(totalMap.containsKey(execId)){
+            if (totalMap.containsKey(execId)) {
                 Integer total = totalMap.get(execId) + count;
-                totalMap.put(execId,total);
-            }else {
-                totalMap.put(execId,count);
+                totalMap.put(execId, total);
+            } else {
+                totalMap.put(execId, count);
             }
-            if(status==1){
-                successMap.put(execId,count);
-            }else if(status==3){
-                skipMap.put(execId,count);
-            }else {
-                if(failedMap.containsKey(execId)){
+            if (status == 1) {
+                successMap.put(execId, count);
+            } else if (status == 3) {
+                skipMap.put(execId, count);
+            } else {
+                if (failedMap.containsKey(execId)) {
                     Integer fCount = failedMap.get(execId) + count;
-                    failedMap.put(execId,fCount);
-                }else {
-                    failedMap.put(execId,count);
+                    failedMap.put(execId, fCount);
+                } else {
+                    failedMap.put(execId, count);
                 }
             }
 
-            if(!timeMap.containsKey(execId)){
-                if(j>0) {
+            if (!timeMap.containsKey(execId)) {
+                if (j > 0) {
                     Long time = 0L;
-                    if(minDate instanceof Date && maxDate instanceof Date) {
-                        time = (maxDate.getTime() - minDate.getTime())/60000;
+                    if (minDate instanceof Date && maxDate instanceof Date) {
+                        time = (maxDate.getTime() - minDate.getTime()) / 60000;
                     }
                     Long idTmp;
                     idTmp = countList.get(j - 1).getExec_id();
-                    timeMap.put(idTmp,time);
+                    timeMap.put(idTmp, time);
                 }
                 minDate = null;
                 maxDate = null;
             }
-            if(min!=null){
-                if(minDate==null || min.getTime()<minDate.getTime()){
-                    minDate=min;
+            if (min != null) {
+                if (minDate == null || min.getTime() < minDate.getTime()) {
+                    minDate = min;
                 }
             }
 
-            if(max!=null){
-                if(maxDate==null || max.getTime()>maxDate.getTime()){
-                    maxDate=max;
+            if (max != null) {
+                if (maxDate == null || max.getTime() > maxDate.getTime()) {
+                    maxDate = max;
                 }
             }
 
-            if(j==countList.size()){
+            if (j == countList.size()) {
                 Long time = 0L;
-                if(minDate instanceof Date && maxDate instanceof Date) {
-                    time = (maxDate.getTime() - minDate.getTime())/60000;
+                if (minDate instanceof Date && maxDate instanceof Date) {
+                    time = (maxDate.getTime() - minDate.getTime()) / 60000;
                 }
-                timeMap.put(execId,time);
+                timeMap.put(execId, time);
             }
         }
         List<Integer> totalList = new ArrayList<>();
@@ -206,7 +222,7 @@ public class AutoCaseService {
         List<Integer> failedList = new ArrayList<>();
         List<Integer> skipList = new ArrayList<>();
         List<Long> timeList = new ArrayList<>();
-        for(Long id:showList){
+        for (Long id : showList) {
             totalList.add(totalMap.get(id));
             successList.add(successMap.get(id));
             failedList.add(failedMap.get(id));
@@ -220,43 +236,94 @@ public class AutoCaseService {
         JsonArray failedData = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(failedList), JsonArray.class);
         JsonArray skipData = JsonParse.getGson().fromJson(JsonParse.getGson().toJson(skipList), JsonArray.class);
         JsonObject jsonObject = new JsonObject();
-        jsonObject.add("xData",xData);
-        jsonObject.add("timeData",timeData);
-        jsonObject.add("totalData",totalData);
-        jsonObject.add("successData",successData);
-        jsonObject.add("failedData",failedData);
-        jsonObject.add("skipData",skipData);
+        jsonObject.add("xData", xData);
+        jsonObject.add("timeData", timeData);
+        jsonObject.add("totalData", totalData);
+        jsonObject.add("successData", successData);
+        jsonObject.add("failedData", failedData);
+        jsonObject.add("skipData", skipData);
         return jsonObject;
     }
 
-    public synchronized JsonArray getRecentExec(){
+    public synchronized JsonArray getRecentExec() {
+        Date currentDate = new Date();
         //统计4个小时内
         Calendar c = Calendar.getInstance();
         c.set(Calendar.HOUR_OF_DAY, (c.get(Calendar.HOUR_OF_DAY) - 4));
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         Long baseExecId = Long.valueOf(simpleDateFormat.format(c.getTime()));
-        List<Long> execIdList = autoCaseExecMapper.findExecId();
+        List<Long> execIdList = autoCaseExecMapper.findExecId(UserContext.get().getIsV());
         List<Long> showList = new ArrayList<>();//展示的从4小时前15条记录
-        if(execIdList.size()==0){
+        if (execIdList.size() == 0) {
             return null;
         }
         for (int i = 0; i < execIdList.size(); i++) {
             if (execIdList.get(i) < baseExecId) {
                 continue;
-            }else {
+            } else {
                 showList.add(execIdList.get(i));
             }
         }
-        if(showList.size()==0){
+        if (showList.size() == 0) {
             return null;
         }
         JsonArray jsonArray = new JsonArray();
-            List<ColumnChart> execs = autoCaseExecMapper.findColumnChart(UserContext.get().getIsV(),
-                    showList.get(showList.size()-1),showList.get(0));
-            for(ColumnChart columnChart:execs){
-                jsonArray.add(JsonParse.getGson().toJson(columnChart));
+        List<ColumnChart> execs = autoCaseExecMapper.findColumnChart(UserContext.get().getIsV(),
+                showList.get(showList.size() - 1), showList.get(0));
+        Map<Long, JsonObject> result = new LinkedHashMap<>();
+        for (ColumnChart columnChart : execs) {
+            if (result.containsKey(columnChart.getExec_id())) {
+                JsonObject resultJson = result.get(columnChart.getExec_id());
+                Integer total = resultJson.get("total").getAsInt();
+                resultJson.addProperty("total", total + columnChart.getTotal());
+                if (columnChart.getStatus() == 1) {
+                    resultJson.addProperty("success", columnChart.getTotal());
+                } else if (columnChart.getStatus() == 2) {
+                    resultJson.addProperty("failed", columnChart.getTotal());
+                } else if (columnChart.getStatus() == 3) {
+                    resultJson.addProperty("skip", columnChart.getTotal());
+                } else {
+                    resultJson.addProperty("other", columnChart.getTotal());
+                }
+                if (columnChart.getMin_start_date() != null
+                        && (columnChart.getMin_start_date().getTime() < resultJson.get("min_start_date").getAsLong()
+                        || currentDate.getTime() == resultJson.get("min_start_date").getAsLong()
+                )) {
+                    resultJson.addProperty("min_start_date", columnChart.getMin_start_date().getTime());
+                }
+                if (columnChart.getMax_end_date() != null
+                        && (columnChart.getMax_end_date().getTime() > resultJson.get("max_end_date").getAsLong()
+                        || currentDate.getTime() == resultJson.get("max_end_date").getAsLong()
+                )) {
+                    resultJson.addProperty("max_end_date", columnChart.getMax_end_date().getTime());
+                }
+            } else {
+                JsonObject resultJson = new JsonObject();
+                resultJson.addProperty("exec_id", columnChart.getExec_id());
+                resultJson.addProperty("total", columnChart.getTotal());
+                if (columnChart.getStatus() == 1) {
+                    resultJson.addProperty("success", columnChart.getTotal());
+                } else if (columnChart.getStatus() == 2) {
+                    resultJson.addProperty("failed", columnChart.getTotal());
+                } else if (columnChart.getStatus() == 3) {
+                    resultJson.addProperty("skip", columnChart.getTotal());
+                } else {
+                    resultJson.addProperty("other", columnChart.getTotal());
+                }
+                if (columnChart.getMin_start_date() == null) {
+                    columnChart.setMin_start_date(currentDate);
+                }
+                if (columnChart.getMax_end_date() == null) {
+                    columnChart.setMax_end_date(currentDate);
+                }
+                resultJson.addProperty("min_start_date", columnChart.getMin_start_date().getTime());
+                resultJson.addProperty("max_end_date", columnChart.getMax_end_date().getTime());
+                result.put(columnChart.getExec_id(), resultJson);
             }
-
+        }
+        for (Map.Entry<Long, JsonObject> entry : result.entrySet()) {
+            jsonArray.add(entry.getValue());
+        }
         return jsonArray;
     }
 
@@ -267,12 +334,12 @@ public class AutoCaseService {
         c.set(Calendar.HOUR_OF_DAY, (c.get(Calendar.HOUR_OF_DAY) - 4));
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         Long baseExecId = Long.valueOf(simpleDateFormat.format(c.getTime()));
-        List<Long> execIdList = autoCaseExecMapper.findExecId();
+        List<Long> execIdList = autoCaseExecMapper.findExecId(UserContext.get().getIsV());
         List<Long> showList = new ArrayList<>();//展示的从4小时前15条记录
         List<Long> allList = new ArrayList<>();//展示的从4小时前所有记录
         List<Long> addList = new ArrayList<>();//展示的从4小时前增量记录
         //从chart表拿exec_id
-        List<Long> scatterExecIdList = scatterChartMapper.findExecId();
+        List<Long> scatterExecIdList = scatterChartMapper.findExecId(UserContext.get().getIsV());
         for (int i = 0; i < execIdList.size(); i++) {
             if (execIdList.get(i) >= baseExecId) {
                 continue;
@@ -322,7 +389,7 @@ public class AutoCaseService {
             Long id = showList.get(i);
             Integer tl = timelineList.get(i);
             String time = descList.get(i);
-            List<ScatterChart> scatterChartList = scatterChartMapper.findByExecId(id);
+            List<ScatterChart> scatterChartList = scatterChartMapper.findByExecId(id, UserContext.get().getIsV());
             if (scatterChartList.size() > 0) {
                 for (ScatterChart scatterChart : scatterChartList) {
                     List<Object> list = new ArrayList<>();
@@ -394,7 +461,7 @@ public class AutoCaseService {
                 } else {
                     List<AutoCaseExec> list = autoCaseExecMapper.findCaseExecByExecId(id2);
                     for (AutoCaseExec a : list) {
-                        ScatterChart s = scatterChartMapper.findOneByCaseId(a.getCase_id());
+                        ScatterChart s = scatterChartMapper.findOneByCaseId(a.getCase_id(), UserContext.get().getIsV());
                         Map<String, Object> countMap = new HashMap<>();
 
                         if (s instanceof ScatterChart) {

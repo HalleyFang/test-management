@@ -44,7 +44,10 @@
     </select>
     <select id="findExecId" resultType="java.lang.Long">
         SELECT exec_id FROM
-        <include refid="table"></include>
+        <include refid="table"></include> t
+        left join case_info c
+        on t.case_id=c.case_id
+        where c.is_v=#{is_v}
         group by exec_id
         order by exec_id desc
     </select>

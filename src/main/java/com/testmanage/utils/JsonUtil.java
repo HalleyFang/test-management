@@ -1,4 +1,4 @@
-package com.testmanage.util;
+package com.testmanage.utils;
 
 import jodd.json.JsonParser;
 import jodd.json.JsonSerializer;

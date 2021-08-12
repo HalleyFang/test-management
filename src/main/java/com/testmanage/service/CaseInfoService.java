@@ -65,9 +65,15 @@ public class CaseInfoService {
     }
 
     public void updateCase(CaseInfo caseInfo) throws Exception {
-        caseInfo.setUpdate_user(UserContext.get().getUsername());
+        if(caseInfo.getUpdate_user().equalsIgnoreCase("Automation")) {
+            log.info("will update case " + caseInfo.getCase_id() + " by Automation");
+        }else {
+            caseInfo.setUpdate_user(UserContext.get().getUsername());
+            log.info("will update case " + caseInfo.getCase_id() + " by " + UserContext.get().getUsername());
+        }
         caseInfo.setUpdate_date(new Date());
         caseInfoMapper.updateCase(caseInfo);
+        log.info("update case " + caseInfo.getCase_id() + " success");
         CaseTreeNode node = caseTreeService.getTreeByCaseId(caseInfo.getCase_id());
         if(node == null){
             throw new Exception("更新case对应的tree节点未找到");
