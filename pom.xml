@@ -99,6 +99,9 @@
                 <version>2.5.2</version>
                 <executions>
                     <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

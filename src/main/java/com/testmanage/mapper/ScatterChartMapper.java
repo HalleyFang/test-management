@@ -21,6 +21,6 @@ public interface ScatterChartMapper {
     ScatterChart findOneByCaseId(@Param("case_id") String case_id,
                                  @Param("is_v") String is_v);
 
-    void batchInsert(List<ScatterChart> scatterCharts);
+    void batchInsert(@Param("scatterCharts") List<ScatterChart> scatterCharts);
 
 }
