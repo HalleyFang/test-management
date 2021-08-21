@@ -8,7 +8,7 @@
         insert into
         <include refid="table"></include>
         values
-        (#{id},#{username},#{password},#{roles},#{permissions},#{salt})
+        (#{id},#{username},#{password},#{roles},#{permissions},#{salt},#{state})
     </insert>
     <update id="updateUser">
         update
@@ -25,6 +25,9 @@
         </if>
         <if test="salt != null and salt != ''">
             salt = #{salt}
+        </if>
+        <if test="state != null and salt != ''">
+            state = #{state}
         </if>
         where
         username = #{username}

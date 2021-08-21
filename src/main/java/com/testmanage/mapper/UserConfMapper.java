@@ -1,13 +1,14 @@
 package com.testmanage.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface UserConfMapper {
 
-    String getParameter(String username,String parameter);
+    String getParameter(@Param("username") String username, @Param("parameter") String parameter);
 
-    void setParameter(String username,String parameter,String value);
+    void setParameter(@Param("username") String username, @Param("parameter") String parameter, @Param("value") String value);
 
-    Integer getCount(String username,String parameter);
+    Integer getCount(@Param("username") String username, @Param("parameter") String parameter);
 }

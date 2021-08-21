@@ -6,6 +6,7 @@ import com.testmanage.entity.CaseInfo;
 import com.testmanage.entity.CaseTreeNode;
 import com.testmanage.entity.TaskCase;
 import com.testmanage.mapper.CaseTreeMapper;
+import com.testmanage.service.redis.RedisManager;
 import com.testmanage.service.user.UserContext;
 import com.testmanage.utils.JsonParse;
 import com.testmanage.utils.SequenceUtil;
@@ -42,8 +43,46 @@ public class CaseTreeService {
     @Autowired
     AutoCaseService autoCaseService;
 
-    @CacheEvict(value = {"tree","totalCount"})
+    @Autowired
+    RedisManager redisManager;
+
+    private String treeKey1 = "tree:v1";
+    private String totalCountKey1 = "totalCount:v1";
+    private String treeKey2 = "tree:v2";
+    private String totalCountKey2 = "totalCount:v2";
+
+    private void redisHasDel(){
+        redisHasDelTree();
+        redisHasDelTotal();
+    }
+
+    private void redisHasDelTotal(){
+        String totalCountKey;
+        if(UserContext.get().getIsV().equalsIgnoreCase("v1")){
+            totalCountKey = totalCountKey1;
+        }else {
+            totalCountKey = totalCountKey2;
+        }
+        if(redisManager.hasKey(totalCountKey)){
+            redisManager.del(totalCountKey);
+        }
+    }
+
+    private void redisHasDelTree(){
+        String treeKey;
+        if(UserContext.get().getIsV().equalsIgnoreCase("v1")){
+            treeKey = treeKey1;
+        }else {
+            treeKey = treeKey2;
+        }
+        if(redisManager.hasKey(treeKey)){
+            redisManager.del(treeKey);
+        }
+    }
+
+//    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void addTree(JsonObject treeJson) throws Exception {
+        redisHasDel();
         Map<String, Object> resultMap = analysisTreeJson(treeJson);
         if (!idIsExist((Long) resultMap.get("id"))) {
             updateTree(treeJson);
@@ -63,8 +102,9 @@ public class CaseTreeService {
 
     }
 
-    @CacheEvict(value = {"tree","totalCount"})
+//    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void addTree(Map<String, Object> map) throws Exception {
+        redisHasDel();
         CaseTreeNode node = (CaseTreeNode) map.get("currentNode");
         Long id = node.getId();
         if (id == null) {
@@ -109,8 +149,9 @@ public class CaseTreeService {
 
     }
 
-    @CacheEvict(value = {"tree","totalCount"})
+//    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void addTree(List<CaseInfo> list){
+        redisHasDel();
         Set<String> parent = new HashSet<>();
         for (CaseInfo caseInfo : list){
             String parent_name = caseInfo.getParent_name();
@@ -163,8 +204,9 @@ public class CaseTreeService {
         }
     }
 
-    @CacheEvict(value = {"tree","totalCount"})
+//    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void deleteTree(Long id) {
+        redisHasDel();
         CaseTreeNode currentNode = caseTreeMapper.findTreeById(id);
         if (currentNode != null) {
             Long preId = currentNode.getPre_id();
@@ -185,8 +227,9 @@ public class CaseTreeService {
         }
     }
 
-    @CacheEvict(value = "tree")
+//    @CacheEvict(value = "tree")
     public synchronized void updateTreeLabel(List<CaseInfo> caseInfoUpdate) throws Exception {
+        redisHasDelTree();
         for (CaseInfo caseInfo : caseInfoUpdate){
             CaseTreeNode node = caseTreeMapper.findTreeByCaseId(caseInfo.getCase_id());
             if(node==null){
@@ -205,19 +248,22 @@ public class CaseTreeService {
         }
     }
 
-    @CacheEvict(value = {"tree","totalCount"})
+//    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void deleteTree(String caseId) {
+        redisHasDel();
         Long id = caseTreeMapper.findNodeByCaseId(caseId);
         deleteTree(id);
     }
 
-    @CacheEvict(value = {"tree","totalCount"})
+//    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void updateTree(CaseTreeNode caseTreeNode) throws Exception {
+        redisHasDel();
         caseTreeMapper.updateTree(caseTreeNode);
     }
 
-    @CacheEvict(value = {"tree","totalCount"})
+//    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void updateTree(JsonObject treeJson) throws Exception {
+        redisHasDel();
         Map<String, Object> resultMap = analysisTreeJson(treeJson);
         CaseTreeNode currentNode = (CaseTreeNode) resultMap.get("currentNode");
         if (!idIsExist((Long) resultMap.get("id"))) {
@@ -306,16 +352,34 @@ public class CaseTreeService {
         return treeNode;//todo
     }
 
-    @Cacheable(value = "tree")
+//    @Cacheable(value = "tree")
     public String getTree() {
-        log.info("Generate Tree by " + UserContext.get().getUsername());
-        return generateTree(0L, null, null);
+        if(UserContext.get().getIsV().equalsIgnoreCase("v1")) {
+            if (redisManager.hasKey(treeKey1)) {
+                return redisManager.get(treeKey1).toString();
+            }
+            log.info("Generate Tree by " + UserContext.get().getUsername());
+            String result = generateTree(0L, null, null);
+            redisManager.set(treeKey1,result);
+            return result;
+        }else {
+            if (redisManager.hasKey(treeKey2)) {
+                return redisManager.get(treeKey2).toString();
+            }
+            log.info("Generate Tree by " + UserContext.get().getUsername());
+            String result = generateTree(0L, null, null);
+            redisManager.set(treeKey2,result);
+            return result;
+        }
     }
 
-    @CachePut(value = "tree")
+/*    @CachePut(value = "tree")
     public String refreshTree() {
+        if(redisManager.hasKey(treeKey)){
+            redisManager.del(treeKey);
+        }
         return generateTree(0L, null, null);
-    }
+    }*/
 
 
     //todo 排序
@@ -398,9 +462,25 @@ public class CaseTreeService {
         return result;
     }
 
-    @Cacheable("totalCount")
+//    @Cacheable("totalCount")
     private Map<Long, Map<String, Integer>> getCaseTotalCount(){
-        return getCaseTotalCount(0L,null);
+        if(UserContext.get().getIsV().equalsIgnoreCase("v1")){
+            if(redisManager.hasKey(totalCountKey1)){
+                return (Map<Long, Map<String, Integer>>) redisManager.get(totalCountKey1);
+            }
+            log.info("Generate TotalCount by " + UserContext.get().getUsername());
+            Map<Long, Map<String, Integer>> result = getCaseTotalCount(0L,null);
+            redisManager.set(totalCountKey1,result);
+            return result;
+        }else {
+            if(redisManager.hasKey(totalCountKey2)){
+                return (Map<Long, Map<String, Integer>>) redisManager.get(totalCountKey2);
+            }
+            log.info("Generate TotalCount by " + UserContext.get().getUsername());
+            Map<Long, Map<String, Integer>> result = getCaseTotalCount(0L,null);
+            redisManager.set(totalCountKey2,result);
+            return result;
+        }
     }
 
     private Map<Long, Map<String, Integer>> getCaseTotalCount(Long id,Map<Long, Map<String, Integer>> recordMap){

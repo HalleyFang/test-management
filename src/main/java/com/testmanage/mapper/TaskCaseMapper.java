@@ -2,6 +2,7 @@ package com.testmanage.mapper;
 
 import com.testmanage.entity.TaskCase;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -18,5 +19,5 @@ public interface TaskCaseMapper {
 
     List<TaskCase> findByTaskId(Long task_id);
 
-    TaskCase findById(Long task_id,String case_id);
+    TaskCase findById(@Param("task_id") Long task_id, @Param("case_id") String case_id);
 }

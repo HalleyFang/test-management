@@ -2,16 +2,15 @@ package com.testmanage.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Set;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class MyUser implements Serializable {
-
-    public MyUser(){
-    }
 
     public MyUser(String username,String isV){
         this.username = username;
@@ -25,4 +24,5 @@ public class MyUser implements Serializable {
     private Set<Permissions> Permissions;
     private String isV;
     private String salt;
+    private Integer state = 0;//0正常 1锁定
 }

@@ -2,6 +2,7 @@ package com.testmanage.mapper;
 
 import com.testmanage.entity.CaseTreeNode;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -14,15 +15,18 @@ public interface CaseTreeMapper {
 
     List<CaseTreeNode> findTree(String is_v);
 
-    List<CaseTreeNode> findTreeByParent(Long parent_id,String is_v);
+    List<CaseTreeNode> findTreeByParent(@Param("parent_id") Long parent_id,
+                                        @Param("is_v") String is_v);
 
-    List<CaseTreeNode> findTreeByParentAndDir(Long parent_id,Boolean is_dir,String is_v);
+    List<CaseTreeNode> findTreeByParentAndDir(@Param("parent_id") Long parent_id,
+                                              @Param("is_dir") Boolean is_dir,
+                                              @Param("is_v") String is_v);
 
     CaseTreeNode findTreeById(Long id);
 
     CaseTreeNode findTreeByCaseId(String case_id);
 
-    Long findNodeByName(String label,String is_v);
+    Long findNodeByName(@Param("label") String label, @Param("is_v") String is_v);
 
     Long findNodeByCaseId(String case_id);
 

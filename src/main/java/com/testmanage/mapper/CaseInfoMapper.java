@@ -2,6 +2,7 @@ package com.testmanage.mapper;
 
 import com.testmanage.entity.CaseInfo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -23,7 +24,7 @@ public interface CaseInfoMapper {
 
     CaseInfo findByCaseId(String case_id);
 
-    CaseInfo findByCaseName(String case_name,String is_v);
+    CaseInfo findByCaseName(@Param("case_name") String case_name, @Param("is_v") String is_v);
 
     List<CaseInfo> findAll();
 

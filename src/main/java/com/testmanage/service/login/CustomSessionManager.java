@@ -1,9 +1,14 @@
 package com.testmanage.service.login;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.session.SessionListener;
+import org.apache.shiro.session.UnknownSessionException;
+import org.apache.shiro.session.mgt.SessionKey;
 import org.apache.shiro.web.servlet.ShiroHttpServletRequest;
 import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
+import org.apache.shiro.web.session.mgt.WebSessionKey;
 import org.apache.shiro.web.util.WebUtils;
-import org.springframework.util.StringUtils;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -33,4 +38,28 @@ public class CustomSessionManager extends DefaultWebSessionManager {
             return super.getSessionId(request, response);
         }
     }
+
+    @Override
+    protected Session retrieveSession(SessionKey sessionKey) throws UnknownSessionException {
+        Serializable sessionId = getSessionId(sessionKey);
+
+        ServletRequest request = null;
+        if (sessionKey instanceof WebSessionKey) {
+            request = ((WebSessionKey) sessionKey).getServletRequest();
+        }
+
+        if (request != null && null != sessionId) {
+            Object sessionObj = request.getAttribute(sessionId.toString());
+            if (sessionObj != null) {
+                return (Session) sessionObj;
+            }
+        }
+
+        Session session = super.retrieveSession(sessionKey);
+        if (request != null && null != sessionId) {
+            request.setAttribute(sessionId.toString(), session);
+        }
+        return session;
+    }
+
 }
