@@ -1,6 +1,9 @@
 package com.testmanage.service;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
 import com.testmanage.entity.AutoCase;
 import com.testmanage.entity.CaseInfo;
 import com.testmanage.entity.CaseTreeNode;
@@ -12,17 +15,12 @@ import com.testmanage.utils.JsonParse;
 import com.testmanage.utils.SequenceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -51,36 +49,36 @@ public class CaseTreeService {
     private String treeKey2 = "tree:v2";
     private String totalCountKey2 = "totalCount:v2";
 
-    private void redisHasDel(){
+    private void redisHasDel() {
         redisHasDelTree();
         redisHasDelTotal();
     }
 
-    private void redisHasDelTotal(){
+    private void redisHasDelTotal() {
         String totalCountKey;
-        if(UserContext.get().getIsV().equalsIgnoreCase("v1")){
+        if (UserContext.get().getIsV().equalsIgnoreCase("v1")) {
             totalCountKey = totalCountKey1;
-        }else {
+        } else {
             totalCountKey = totalCountKey2;
         }
-        if(redisManager.hasKey(totalCountKey)){
+        if (redisManager.hasKey(totalCountKey)) {
             redisManager.del(totalCountKey);
         }
     }
 
-    private void redisHasDelTree(){
+    private void redisHasDelTree() {
         String treeKey;
-        if(UserContext.get().getIsV().equalsIgnoreCase("v1")){
+        if (UserContext.get().getIsV().equalsIgnoreCase("v1")) {
             treeKey = treeKey1;
-        }else {
+        } else {
             treeKey = treeKey2;
         }
-        if(redisManager.hasKey(treeKey)){
+        if (redisManager.hasKey(treeKey)) {
             redisManager.del(treeKey);
         }
     }
 
-//    @CacheEvict(value = {"tree","totalCount"})
+    //    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void addTree(JsonObject treeJson) throws Exception {
         redisHasDel();
         Map<String, Object> resultMap = analysisTreeJson(treeJson);
@@ -102,7 +100,7 @@ public class CaseTreeService {
 
     }
 
-//    @CacheEvict(value = {"tree","totalCount"})
+    //    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void addTree(Map<String, Object> map) throws Exception {
         redisHasDel();
         CaseTreeNode node = (CaseTreeNode) map.get("currentNode");
@@ -149,20 +147,22 @@ public class CaseTreeService {
 
     }
 
-//    @CacheEvict(value = {"tree","totalCount"})
-    public synchronized void addTree(List<CaseInfo> list){
+    //    @CacheEvict(value = {"tree","totalCount"})
+    public synchronized void addTree(List<CaseInfo> list) {
         redisHasDel();
         Set<String> parent = new HashSet<>();
-        for (CaseInfo caseInfo : list){
+        for (CaseInfo caseInfo : list) {
             String parent_name = caseInfo.getParent_name();
-            if(parent_name==null || parent_name.isEmpty()){
-                parent_name="DEFAULT";
+            if (parent_name == null || parent_name.isEmpty()) {
+                parent_name = "DEFAULT_" + UserContext.get().getIsV();
+                caseInfo.setParent_name(parent_name);//没有则设置为default
             }
             parent.add(parent_name);
         }
-        for (String s : parent){
-            Long id = caseTreeMapper.findNodeByName(s,UserContext.get().getIsV());
-            if(id==null){
+        //parent没有则先创建parent
+        for (String s : parent) {
+            Long id = caseTreeMapper.findNodeByName(s, UserContext.get().getIsV());
+            if (id == null) {
                 CaseTreeNode caseTreeNode = new CaseTreeNode();
                 caseTreeNode.setId(Long.valueOf(sequenceUtil.getNext("treeId")));
                 caseTreeNode.setParent_id(0L);
@@ -178,19 +178,19 @@ public class CaseTreeService {
         }
 
         List<Long> idList = new ArrayList<>();
-        for(int i=0;i<list.size();i++){
+        for (int i = 0; i < list.size(); i++) {
             idList.add(Long.valueOf(sequenceUtil.getNext("treeId")));
         }
-        for (int i=0;i<list.size();i++){
+        for (int i = 0; i < list.size(); i++) {
             CaseInfo caseInfo = list.get(i);
-            Long parentId = caseTreeMapper.findNodeByName(caseInfo.getParent_name(),UserContext.get().getIsV());
+            Long parentId = caseTreeMapper.findNodeByName(caseInfo.getParent_name(), UserContext.get().getIsV());
             CaseTreeNode caseTreeNode = new CaseTreeNode();
             caseTreeNode.setId(idList.get(i));
-            if(i>0){
-                caseTreeNode.setPre_id(idList.get(i-1));
+            if (i > 0) {
+                caseTreeNode.setPre_id(idList.get(i - 1));
             }
-            if(i<list.size()-1){
-                caseTreeNode.setPost_id(idList.get(i+1));
+            if (i < list.size() - 1) {
+                caseTreeNode.setPost_id(idList.get(i + 1));
             }
             caseTreeNode.setParent_id(parentId);
             caseTreeNode.setIs_dir(false);
@@ -204,7 +204,7 @@ public class CaseTreeService {
         }
     }
 
-//    @CacheEvict(value = {"tree","totalCount"})
+    //    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void deleteTree(Long id) {
         redisHasDel();
         CaseTreeNode currentNode = caseTreeMapper.findTreeById(id);
@@ -227,17 +227,17 @@ public class CaseTreeService {
         }
     }
 
-//    @CacheEvict(value = "tree")
+    //    @CacheEvict(value = "tree")
     public synchronized void updateTreeLabel(List<CaseInfo> caseInfoUpdate) throws Exception {
         redisHasDelTree();
-        for (CaseInfo caseInfo : caseInfoUpdate){
+        for (CaseInfo caseInfo : caseInfoUpdate) {
             CaseTreeNode node = caseTreeMapper.findTreeByCaseId(caseInfo.getCase_id());
-            if(node==null){
+            if (node == null) {
                 throw new Exception("更新 tree label 找不到节点");
             }
             String label = node.getLabel();
-            if((label == null || !label.equalsIgnoreCase(caseInfo.getCase_name()))
-            && caseInfo.getCase_name() != null){
+            if ((label == null || !label.equalsIgnoreCase(caseInfo.getCase_name()))
+                    && caseInfo.getCase_name() != null) {
                 CaseTreeNode caseTreeNode = new CaseTreeNode();
                 caseTreeNode.setId(node.getId());
                 caseTreeNode.setLabel(caseInfo.getCase_name());
@@ -248,20 +248,20 @@ public class CaseTreeService {
         }
     }
 
-//    @CacheEvict(value = {"tree","totalCount"})
+    //    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void deleteTree(String caseId) {
         redisHasDel();
         Long id = caseTreeMapper.findNodeByCaseId(caseId);
         deleteTree(id);
     }
 
-//    @CacheEvict(value = {"tree","totalCount"})
+    //    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void updateTree(CaseTreeNode caseTreeNode) throws Exception {
         redisHasDel();
         caseTreeMapper.updateTree(caseTreeNode);
     }
 
-//    @CacheEvict(value = {"tree","totalCount"})
+    //    @CacheEvict(value = {"tree","totalCount"})
     public synchronized void updateTree(JsonObject treeJson) throws Exception {
         redisHasDel();
         Map<String, Object> resultMap = analysisTreeJson(treeJson);
@@ -352,23 +352,23 @@ public class CaseTreeService {
         return treeNode;//todo
     }
 
-//    @Cacheable(value = "tree")
+    //    @Cacheable(value = "tree")
     public String getTree() {
-        if(UserContext.get().getIsV().equalsIgnoreCase("v1")) {
+        if (UserContext.get().getIsV().equalsIgnoreCase("v1")) {
             if (redisManager.hasKey(treeKey1)) {
                 return redisManager.get(treeKey1).toString();
             }
             log.info("Generate Tree by " + UserContext.get().getUsername());
             String result = generateTree(0L, null, null);
-            redisManager.set(treeKey1,result);
+            redisManager.set(treeKey1, result);
             return result;
-        }else {
+        } else {
             if (redisManager.hasKey(treeKey2)) {
                 return redisManager.get(treeKey2).toString();
             }
             log.info("Generate Tree by " + UserContext.get().getUsername());
             String result = generateTree(0L, null, null);
-            redisManager.set(treeKey2,result);
+            redisManager.set(treeKey2, result);
             return result;
         }
     }
@@ -391,7 +391,7 @@ public class CaseTreeService {
         }
         for (CaseTreeNode node : treeNodeList) {
             if (node.getIs_dir() && !node.getIs_delete()) {
-                Map<String,Object> totalCount = getCaseTotal(node.getId());
+                Map<String, Object> totalCount = getCaseTotal(node.getId());
                 Integer total = totalCount.get("total") == null ? 0 : (Integer) totalCount.get("total");
                 Double auto = totalCount.get("auto") == null ? 0.00 : (Double) totalCount.get("auto");
                 if (parentId == 0) {
@@ -402,8 +402,8 @@ public class CaseTreeService {
                     jsonObject.addProperty("is_dir", true);
                     jsonObject.addProperty("icon", "el-icon-folder");
                     jsonObject.addProperty("status", 0);
-                    jsonObject.addProperty("total",total);
-                    jsonObject.addProperty("auto",auto);
+                    jsonObject.addProperty("total", total);
+                    jsonObject.addProperty("auto", auto);
                     JsonArray j = new JsonArray();
                     jsonObject.add("children", j);
                     map = new HashMap<>();
@@ -417,8 +417,8 @@ public class CaseTreeService {
                     j2.addProperty("is_dir", true);
                     j2.addProperty("icon", "el-icon-folder");
                     j2.addProperty("status", 0);
-                    j2.addProperty("total",total);
-                    j2.addProperty("auto",auto);
+                    j2.addProperty("total", total);
+                    j2.addProperty("auto", auto);
                     JsonArray j = new JsonArray();
                     j2.add("children", j);
                     jsonArray.add(j2);
@@ -432,7 +432,7 @@ public class CaseTreeService {
                 JsonObject nodeJson = JsonParse.StringToJson(str);
                 CaseInfo caseInfo = caseInfoService.queryCase(node.getCase_id());
                 Boolean isAuto = false;
-                if(caseInfo instanceof CaseInfo){
+                if (caseInfo instanceof CaseInfo) {
                     isAuto = caseInfo.getIs_auto();
                 }
                 nodeJson.addProperty("icon", "el-icon-tickets");
@@ -445,73 +445,76 @@ public class CaseTreeService {
         return treeJson.toString();
     }
 
-    private Map<String,Object> getCaseTotal(Long id){
-        Map<Long,Map<String,Integer>> idMap = getCaseTotalCount();
-        Map<String,Integer> map = idMap.get(id);
-        Integer total = map.get("total") == null ? 0 :map.get("total");
-        Integer autoTmp = map.get("auto") == null ? 0 :map.get("auto");
+    private Map<String, Object> getCaseTotal(Long id) {
+        Map<Long, Map<String, Integer>> idMap = getCaseTotalCount();
+        Map<String, Integer> map = idMap.get(id);
+        if (map == null || map.isEmpty()) {
+            return new HashMap<>();
+        }
+        Integer total = map.get("total") == null ? 0 : map.get("total");
+        Integer autoTmp = map.get("auto") == null ? 0 : map.get("auto");
         Double autoCount = Double.valueOf(autoTmp);
         Double auto = 0.00;
-        if(total!=0){
-            BigDecimal bigDecimal= new BigDecimal((autoCount/total)*100);
-            auto = bigDecimal.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+        if (total != 0) {
+            BigDecimal bigDecimal = new BigDecimal((autoCount / total) * 100);
+            auto = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
         }
-        Map<String,Object> result = new HashMap<>();
-        result.put("total",total);
-        result.put("auto",auto);
+        Map<String, Object> result = new HashMap<>();
+        result.put("total", total);
+        result.put("auto", auto);
         return result;
     }
 
-//    @Cacheable("totalCount")
-    private Map<Long, Map<String, Integer>> getCaseTotalCount(){
-        if(UserContext.get().getIsV().equalsIgnoreCase("v1")){
-            if(redisManager.hasKey(totalCountKey1)){
+    //    @Cacheable("totalCount")
+    private Map<Long, Map<String, Integer>> getCaseTotalCount() {
+        if (UserContext.get().getIsV().equalsIgnoreCase("v1")) {
+            if (redisManager.hasKey(totalCountKey1)) {
                 return (Map<Long, Map<String, Integer>>) redisManager.get(totalCountKey1);
             }
             log.info("Generate TotalCount by " + UserContext.get().getUsername());
-            Map<Long, Map<String, Integer>> result = getCaseTotalCount(0L,null);
-            redisManager.set(totalCountKey1,result);
+            Map<Long, Map<String, Integer>> result = getCaseTotalCount(0L, null);
+            redisManager.set(totalCountKey1, result);
             return result;
-        }else {
-            if(redisManager.hasKey(totalCountKey2)){
+        } else {
+            if (redisManager.hasKey(totalCountKey2)) {
                 return (Map<Long, Map<String, Integer>>) redisManager.get(totalCountKey2);
             }
             log.info("Generate TotalCount by " + UserContext.get().getUsername());
-            Map<Long, Map<String, Integer>> result = getCaseTotalCount(0L,null);
-            redisManager.set(totalCountKey2,result);
+            Map<Long, Map<String, Integer>> result = getCaseTotalCount(0L, null);
+            redisManager.set(totalCountKey2, result);
             return result;
         }
     }
 
-    private Map<Long, Map<String, Integer>> getCaseTotalCount(Long id,Map<Long, Map<String, Integer>> recordMap){
-        if(recordMap==null){
+    private Map<Long, Map<String, Integer>> getCaseTotalCount(Long id, Map<Long, Map<String, Integer>> recordMap) {
+        if (recordMap == null) {
             recordMap = new HashMap<>();
         }
-        List<CaseTreeNode> listDir = caseTreeMapper.findTreeByParentAndDir(id,true,UserContext.get().getIsV());
-        for(CaseTreeNode node:listDir){
-            getCaseTotalCount(node.getId(),recordMap);
+        List<CaseTreeNode> listDir = caseTreeMapper.findTreeByParentAndDir(id, true, UserContext.get().getIsV());
+        for (CaseTreeNode node : listDir) {
+            getCaseTotalCount(node.getId(), recordMap);
         }
-        List<CaseTreeNode> listCase = caseTreeMapper.findTreeByParentAndDir(id,false,UserContext.get().getIsV());
-        Map<String,Integer> mapCount = recordMap.get(id);
-        if(mapCount==null){
+        List<CaseTreeNode> listCase = caseTreeMapper.findTreeByParentAndDir(id, false, UserContext.get().getIsV());
+        Map<String, Integer> mapCount = recordMap.get(id);
+        if (mapCount == null) {
             mapCount = new HashMap<>();
         }
-        Integer total = mapCount.get("total") == null ? 0 :mapCount.get("total");
+        Integer total = mapCount.get("total") == null ? 0 : mapCount.get("total");
         total += listCase.size();
-        mapCount.put("total",total);
-        Integer auto = mapCount.get("auto") == null ? 0 :mapCount.get("auto");
-        for(CaseTreeNode node:listCase){
+        mapCount.put("total", total);
+        Integer auto = mapCount.get("auto") == null ? 0 : mapCount.get("auto");
+        for (CaseTreeNode node : listCase) {
             String caseId = node.getCase_id();
-            if(!StringUtils.isEmpty(caseId)) {
+            if (!StringUtils.isEmpty(caseId)) {
                 AutoCase autoCase = autoCaseService.findCaseById(caseId);
-                if(autoCase instanceof AutoCase){
+                if (autoCase instanceof AutoCase) {
                     auto++;
                 }
             }
         }
-        mapCount.put("auto",auto);
-        if(id>0) {
-            recordMap.put(id,mapCount);//记录结果，0除外
+        mapCount.put("auto", auto);
+        if (id > 0) {
+            recordMap.put(id, mapCount);//记录结果，0除外
             //如果有parent，则要把结果加到parent;0是根节点除外
             CaseTreeNode node = caseTreeMapper.findTreeById(id);
             Long toId = node.getParent_id();
@@ -519,99 +522,99 @@ public class CaseTreeService {
             Integer parentAuto = recordMap.get(toId) == null ? 0 : recordMap.get(toId).get("auto");
             parentTotal += total;
             parentAuto += auto;
-            Map<String,Integer> toCount = new HashMap<>();
-            toCount.put("total",parentTotal);
-            toCount.put("auto",parentAuto);
-            recordMap.put(toId,toCount);
+            Map<String, Integer> toCount = new HashMap<>();
+            toCount.put("total", parentTotal);
+            toCount.put("auto", parentAuto);
+            recordMap.put(toId, toCount);
         }
         return recordMap;
     }
 
 
-    public String getTaskTree(Long taskId,List<Long> treeId) throws Exception {
-        Stack stack = taskTree(treeId,null);
-        return taskTreeGenerate(taskId,stack);
+    public String getTaskTree(Long taskId, List<Long> treeId) throws Exception {
+        Stack stack = taskTree(treeId, null);
+        return taskTreeGenerate(taskId, stack);
     }
 
-    private Stack taskTree(List<Long> treeId, Stack<Map<Long,List<Long>>> treeStack) throws Exception {
-        if(treeId.size()==0){
+    private Stack taskTree(List<Long> treeId, Stack<Map<Long, List<Long>>> treeStack) throws Exception {
+        if (treeId.size() == 0) {
             throw new Exception("请关联用例");
         }
-        Map<Long,List<Long>> map = new LinkedHashMap<>();//父节点和子节点对应关系
-        for(Long tId : treeId){
+        Map<Long, List<Long>> map = new LinkedHashMap<>();//父节点和子节点对应关系
+        for (Long tId : treeId) {
             Long parentId = 0L;
-            if(tId!=0L){
-            CaseTreeNode treeNode = caseTreeMapper.findTreeById(tId);
-            if(treeNode==null){
-                log.error("node can not find by id: " + tId + "; please check is it be deleted");
-            }else {
-                parentId = treeNode.getParent_id();
+            if (tId != 0L) {
+                CaseTreeNode treeNode = caseTreeMapper.findTreeById(tId);
+                if (treeNode == null) {
+                    log.error("node can not find by id: " + tId + "; please check is it be deleted");
+                } else {
+                    parentId = treeNode.getParent_id();
+                }
             }
-            }
-            if(!map.containsKey(parentId)){
-                map.put(parentId,new ArrayList<>());
+            if (!map.containsKey(parentId)) {
+                map.put(parentId, new ArrayList<>());
             }
             List<Long> list = map.get(parentId);
             list.add(tId);
-            map.put(parentId,list);
+            map.put(parentId, list);
         }
-        if(treeStack==null){
+        if (treeStack == null) {
             treeStack = new Stack<>();
         }
         treeStack.push(map);
-        if(map.size()>1 || !map.containsKey(0L)){
+        if (map.size() > 1 || !map.containsKey(0L)) {
             List<Long> parenIdList = new ArrayList<>();
-            for(Map.Entry entry: map.entrySet()){
+            for (Map.Entry entry : map.entrySet()) {
                 parenIdList.add((Long) entry.getKey());
             }
-            taskTree(parenIdList,treeStack);
+            taskTree(parenIdList, treeStack);
         }
         return treeStack;
     }
 
-    private String taskTreeGenerate(Long taskId,Stack<Map<Long,List<Long>>> treeStack){
-        if(treeStack.empty()){
+    private String taskTreeGenerate(Long taskId, Stack<Map<Long, List<Long>>> treeStack) {
+        if (treeStack.empty()) {
             return null;
         }
         Map<Long, JsonArray> parentMap = new HashMap<>();
         List<JsonObject> jsonObjectList = new ArrayList<>();
         Integer stackSize = treeStack.size();
-        for (int i=0;i<stackSize;i++){
-            Map<Long,List<Long>> treeMap = treeStack.pop();
+        for (int i = 0; i < stackSize; i++) {
+            Map<Long, List<Long>> treeMap = treeStack.pop();
             //遍历节点map
-            for(Map.Entry entry:treeMap.entrySet()){
+            for (Map.Entry entry : treeMap.entrySet()) {
                 List<Long> listNode = (List<Long>) entry.getValue();
-                    for(Long id:listNode){
-                        if(id!=0L){
-                            CaseTreeNode caseTreeNode = caseTreeMapper.findTreeById(id);
-                            JsonObject jsonObject;
-                            if(caseTreeNode.getIs_dir()){
-                                jsonObject = JsonParse.StringToJson(JsonParse.getGson().toJson(caseTreeNode));
-                                jsonObject.addProperty("icon", "el-icon-folder");
-                                JsonArray j = new JsonArray();
-                                jsonObject.add("children", j);
-                                parentMap.put(id, j);
-                                if(caseTreeNode.getParent_id()!=0L){
-                                    JsonArray jsonArray = parentMap.get(entry.getKey());
-                                    jsonArray.add(jsonObject);
-                                }
-                            }else {
+                for (Long id : listNode) {
+                    if (id != 0L) {
+                        CaseTreeNode caseTreeNode = caseTreeMapper.findTreeById(id);
+                        JsonObject jsonObject;
+                        if (caseTreeNode.getIs_dir()) {
+                            jsonObject = JsonParse.StringToJson(JsonParse.getGson().toJson(caseTreeNode));
+                            jsonObject.addProperty("icon", "el-icon-folder");
+                            JsonArray j = new JsonArray();
+                            jsonObject.add("children", j);
+                            parentMap.put(id, j);
+                            if (caseTreeNode.getParent_id() != 0L) {
                                 JsonArray jsonArray = parentMap.get(entry.getKey());
-                                TaskCase taskCase = taskCaseService.query(taskId, caseTreeNode.getCase_id());
-                                jsonObject = JsonParse.StringToJson(JsonParse.getGson().toJson(caseTreeNode));
-                                jsonObject.addProperty("result", taskCase.getCase_status());
-                                jsonObject.addProperty("icon", "el-icon-tickets");
                                 jsonArray.add(jsonObject);
                             }
-                            if((Long)entry.getKey()==0L) {
-                                jsonObjectList.add(jsonObject);
-                            }
+                        } else {
+                            JsonArray jsonArray = parentMap.get(entry.getKey());
+                            TaskCase taskCase = taskCaseService.query(taskId, caseTreeNode.getCase_id());
+                            jsonObject = JsonParse.StringToJson(JsonParse.getGson().toJson(caseTreeNode));
+                            jsonObject.addProperty("result", taskCase.getCase_status());
+                            jsonObject.addProperty("icon", "el-icon-tickets");
+                            jsonArray.add(jsonObject);
+                        }
+                        if ((Long) entry.getKey() == 0L) {
+                            jsonObjectList.add(jsonObject);
                         }
                     }
+                }
             }
         }
         JsonArray treeJson = new JsonArray();
-        for(JsonObject jo:jsonObjectList){
+        for (JsonObject jo : jsonObjectList) {
             treeJson.add(jo);
         }
         return treeJson.toString();
@@ -668,11 +671,11 @@ public class CaseTreeService {
         return id;
     }
 
-    public CaseTreeNode getTreeById(Long id){
+    public CaseTreeNode getTreeById(Long id) {
         return caseTreeMapper.findTreeById(id);
     }
 
-    public CaseTreeNode getTreeByCaseId(String caseId){
+    public CaseTreeNode getTreeByCaseId(String caseId) {
         return caseTreeMapper.findTreeByCaseId(caseId);
     }
 

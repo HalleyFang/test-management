@@ -3,7 +3,6 @@ package com.testmanage.service;
 import com.testmanage.entity.CaseInfo;
 import com.testmanage.entity.CaseTreeNode;
 import com.testmanage.mapper.CaseInfoMapper;
-import com.testmanage.service.user.UserConfService;
 import com.testmanage.service.user.UserContext;
 import com.testmanage.utils.JsonParse;
 import com.testmanage.utils.SequenceUtil;
@@ -59,15 +58,16 @@ public class CaseInfoService {
     }
 
     public void addCase(List<CaseInfo> caseInfos) {
-        if (caseInfos.size()>0) {
+        if (caseInfos.size() > 0) {
             caseInfoMapper.insertCaseBatch(caseInfos);
         }
     }
 
     public void updateCase(CaseInfo caseInfo) throws Exception {
-        if(caseInfo.getUpdate_user().equalsIgnoreCase("Automation")) {
+        if (caseInfo.getUpdate_user() != null
+                && caseInfo.getUpdate_user().equalsIgnoreCase("Automation")) {
             log.info("will update case " + caseInfo.getCase_id() + " by Automation");
-        }else {
+        } else {
             caseInfo.setUpdate_user(UserContext.get().getUsername());
             log.info("will update case " + caseInfo.getCase_id() + " by " + UserContext.get().getUsername());
         }
@@ -75,12 +75,12 @@ public class CaseInfoService {
         caseInfoMapper.updateCase(caseInfo);
         log.info("update case " + caseInfo.getCase_id() + " success");
         CaseTreeNode node = caseTreeService.getTreeByCaseId(caseInfo.getCase_id());
-        if(node == null){
+        if (node == null) {
             throw new Exception("更新case对应的tree节点未找到");
         }
         String treeLabel = node.getLabel();
-        if((treeLabel ==null || !treeLabel.equalsIgnoreCase(caseInfo.getCase_name()))
-        && caseInfo.getCase_name() != null){
+        if ((treeLabel == null || !treeLabel.equalsIgnoreCase(caseInfo.getCase_name()))
+                && caseInfo.getCase_name() != null) {
             CaseTreeNode caseTreeNode = new CaseTreeNode();
             caseTreeNode.setId(node.getId());
             caseTreeNode.setLabel(caseInfo.getCase_name());
