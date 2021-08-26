@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Data
-@ConfigurationProperties(prefix = "tm.dingDing")
+@ConfigurationProperties(prefix = "tm.dingding")
 @Component
 public class DingDingConf {
 

@@ -99,6 +99,7 @@ public class CaseBodyToInfo {
         Map<Integer, String> map = new LinkedHashMap<>();
         for (String ss : list) {
             int index = ss.indexOf(".");
+            log.debug("step:" + ss);
             map.put(Integer.valueOf(ss.substring(0, index)), ss.substring(index + 1));
         }
         return map;

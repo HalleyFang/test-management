@@ -213,6 +213,7 @@ public class CaseTreeController {
                 caseTreeService.updateTreeLabel(caseInfosUpdate);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             response.sendError(500);
         }
 

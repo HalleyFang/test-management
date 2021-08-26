@@ -151,8 +151,8 @@ public class ShiroConfig {
         //防止xss读取cookie
         simpleCookie.setHttpOnly(true);
 //        simpleCookie.setPath("/");
-        //<!-- 记住我cookie生效时间30天 ,单位秒;-->
-        simpleCookie.setMaxAge(2592000);
+        //<!-- 记住我cookie生效时间7天 ,单位秒;-->
+        simpleCookie.setMaxAge(604800000);
         return simpleCookie;
     }
 
@@ -192,7 +192,7 @@ public class ShiroConfig {
         //redis中针对不同用户缓存
         redisCacheManager.setPrincipalIdFieldName("username");
         //用户权限信息缓存时间
-        redisCacheManager.setExpire(200000);
+        redisCacheManager.setExpire(86400000);
         return redisCacheManager;
     }
 
@@ -251,7 +251,7 @@ public class ShiroConfig {
         RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
         redisSessionDAO.setRedisManager(redisManager());
         //session在redis中的保存时间,最好大于session会话超时时间
-        redisSessionDAO.setExpire(100000);
+        redisSessionDAO.setExpire(86400000);
         return redisSessionDAO;
     }
 
