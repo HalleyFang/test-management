@@ -1,25 +1,18 @@
 package com.testmanage.service;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.testmanage.entity.Task;
 import com.testmanage.entity.TaskCase;
 import com.testmanage.mapper.TaskCaseMapper;
 import com.testmanage.mapper.TaskMapper;
-import com.testmanage.mapper.UserConfMapper;
 import com.testmanage.service.user.UserContext;
-import com.testmanage.utils.JsonParse;
 import com.testmanage.utils.SequenceUtil;
-import javafx.scene.input.DataFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -94,48 +87,84 @@ public class TaskService {
         return task;
     }
 
-    public List<Task> findTaskPage(Integer page,Integer pageSize) throws ParseException {
-        List<Task> p = new ArrayList<>();
-        List<Task> ts = findAllTask();
-            for(int i=(page-1)*pageSize;i<ts.size();i++){
-                if(i<page*pageSize){
-                    Task task = ts.get(i);
-                    Map<String,Integer> map = taskStatus(task.getId());
-                    task.setCase_count(map.get("caseCount"));
-                    task.setStatus(map.get("status"));
-                    task = formDate(task);
-                    p.add(task);
-                }else {
-                    break;
-                }
-            }
-        return p;
+    public Map<String, Object> findTaskPage(Integer page, Integer pageSize, String executor, String taskStatus) throws ParseException {
+        if(StringUtils.isEmpty(executor)){
+            executor = "all";
+        }
+        if(StringUtils.isEmpty(taskStatus)){
+            taskStatus = "all";
+        }
+        List<Task> ts = findAllTaskByExecutor(executor);
+        List<Task> tst = findByTaskStatus(taskStatus,ts);
+        return pageList(page,pageSize,tst);
     }
 
 
-    public List<Task> findUserTaskPage(Integer page,Integer pageSize) throws ParseException {
-        List<Task> p = new ArrayList<>();
+    public Map<String, Object> findUserTaskPage(Integer page, Integer pageSize, String taskStatus) throws ParseException {
+        if(StringUtils.isEmpty(taskStatus)){
+            taskStatus = "all";
+        }
+        List<Task> tmpList = findAllTaskByExecutor(UserContext.get().getUsername());
+        List<Task> tst = findByTaskStatus(taskStatus,tmpList);
+        return pageList(page,pageSize,tst);
+    }
+
+    private List<Task> findAllTaskByExecutor(String executor){
         List<Task> ts = findAllTask();
+        if(executor.equalsIgnoreCase("all")){
+            return ts;
+        }
         List<Task> tmpList = new ArrayList<>();
         for(Task t : ts){
             if(!StringUtils.isEmpty(t.getExecutor())
-                    && t.getExecutor().equalsIgnoreCase(UserContext.get().getUsername())){
+                    && t.getExecutor().equalsIgnoreCase(executor)){
                 tmpList.add(t);
             }
         }
+        return tmpList;
+    }
+
+    private List<Task> findByTaskStatus(String taskStatus,List<Task> tmpList) {
+        for(Task task:tmpList) {
+            Map<String, Integer> map = taskStatus(task.getId());
+            task.setCase_count(map.get("caseCount"));
+            task.setStatus(map.get("status"));
+        }
+        if(taskStatus.equalsIgnoreCase("all")){
+            return tmpList;
+        }
+        List<Task> ts = new ArrayList<>();
+        if(taskStatus.equalsIgnoreCase("complete")){
+            for(Task t : tmpList){
+                if(t.getStatus() == 100){
+                    ts.add(t);
+                }
+            }
+        }else {
+            for(Task t : tmpList){
+                if(t.getStatus() != 100){
+                    ts.add(t);
+                }
+            }
+        }
+        return ts;
+    }
+
+    private Map<String,Object> pageList(Integer page,Integer pageSize,List<Task> tmpList) throws ParseException {
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.put("total",tmpList.size());
+        List<Task> p = new ArrayList<>();
         for(int i=(page-1)*pageSize;i<tmpList.size();i++){
             if(i<page*pageSize){
                 Task task = tmpList.get(i);
-                Map<String,Integer> map = taskStatus(task.getId());
-                task.setCase_count(map.get("caseCount"));
-                task.setStatus(map.get("status"));
                 task = formDate(task);
                 p.add(task);
             }else {
                 break;
             }
         }
-        return p;
+        resultMap.put("taskList",p);
+        return resultMap;
     }
 
     public Integer findTaskTotal(String type) throws ParseException {
