@@ -16,35 +16,35 @@ public class TaskCaseService {
     @Autowired
     TaskCaseMapper taskCaseMapper;
 
-    public List<TaskCase> findByTaskId(Long id){
+    public List<TaskCase> findByTaskId(Long id) {
         return taskCaseMapper.findByTaskId(id);
     }
 
-    public void addCase(TaskCase taskCase){
-        TaskCase c = taskCaseMapper.findById(taskCase.getTask_id(),taskCase.getCase_id());
-        if(c==null){
+    public void addCase(TaskCase taskCase) {
+        TaskCase c = taskCaseMapper.findById(taskCase.getTask_id(), taskCase.getCase_id());
+        if (c == null) {
             taskCaseMapper.addCase(taskCase);
         }
     }
 
-    public void updateCase(TaskCase taskCase){
-        TaskCase c = taskCaseMapper.findById(taskCase.getTask_id(),taskCase.getCase_id());
-        if(c!=null){
-            if (taskCase.getCase_status()!=c.getCase_status()) {
+    public void updateCase(TaskCase taskCase) {
+        TaskCase c = taskCaseMapper.findById(taskCase.getTask_id(), taskCase.getCase_id());
+        if (c != null) {
+            if (taskCase.getCase_status() != c.getCase_status()) {
                 taskCaseMapper.updateCase(taskCase);
             }
-        }else {
+        } else {
             taskCaseMapper.addCase(taskCase);
         }
     }
 
-    public TaskCase query(Long taskId, String caseId){
-        return taskCaseMapper.findById(taskId,caseId);
+    public TaskCase query(Long taskId, String caseId) {
+        return taskCaseMapper.findById(taskId, caseId);
     }
 
 
-    public void refreshCase(Map<Long,String> caseIdMap,Long taskId){
-        for (Map.Entry entry:caseIdMap.entrySet()){
+    public void refreshCase(Map<Long, String> caseIdMap, Long taskId) {
+        for (Map.Entry entry : caseIdMap.entrySet()) {
             TaskCase taskCase = new TaskCase();
             taskCase.setCase_id(entry.getValue().toString());
             taskCase.setTask_id(Long.valueOf(taskId));
@@ -54,14 +54,14 @@ public class TaskCaseService {
             addCase(taskCase);
         }
         List<TaskCase> ts = taskCaseMapper.findByTaskId(taskId);
-        for(TaskCase t : ts){
-            if(!caseIdMap.containsKey(t.getTree_id())){
+        for (TaskCase t : ts) {
+            if (!caseIdMap.containsKey(t.getTree_id())) {
                 taskCaseMapper.deleteCase(t);
             }
         }
     }
 
-    public void deleteCaseById(String case_id){
+    public void deleteCaseById(String case_id) {
         taskCaseMapper.deleteCaseById(case_id);
     }
 }

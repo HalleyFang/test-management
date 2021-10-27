@@ -1,8 +1,8 @@
 package com.testmanage.service.login;
 
+import com.testmanage.entity.MyUser;
 import com.testmanage.entity.Permissions;
 import com.testmanage.entity.Roles;
-import com.testmanage.entity.MyUser;
 import com.testmanage.service.user.UserService;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -11,15 +11,12 @@ import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
-import org.apache.shiro.crypto.hash.Md5Hash;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import java.util.Random;
 
 @Service
 public class CustomRealm extends AuthorizingRealm {

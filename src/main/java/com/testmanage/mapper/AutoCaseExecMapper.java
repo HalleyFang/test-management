@@ -14,20 +14,20 @@ public interface AutoCaseExecMapper {
 
     void update(AutoCaseExec autoCaseExec);
 
-    AutoCaseExec findCaseExecById(@Param("exec_id")Long exec_id,
-                                  @Param("case_id")String case_id,
-                                  @Param("exec_parameter")String exec_parameter);
+    AutoCaseExec findCaseExecById(@Param("exec_id") Long exec_id,
+                                  @Param("case_id") String case_id,
+                                  @Param("exec_parameter") String exec_parameter);
 
     List<Long> findExecId(String is_v);
 
-    List<ColumnChart> findColumnChart(@Param("is_v")String is_v,
-                                      @Param("minId")Long minId,
-                                      @Param("maxId")Long maxId);
+    List<ColumnChart> findColumnChart(@Param("is_v") String is_v,
+                                      @Param("minId") Long minId,
+                                      @Param("maxId") Long maxId);
 
     List<AutoCaseExec> findCaseExecByExecId(Long exec_id);
 
-    List<AutoCaseExec> findCaseExecByCaseId(@Param("case_id")String case_id,
-                                            @Param("exec_parameter")String exec_parameter);
+    List<AutoCaseExec> findCaseExecByCaseId(@Param("case_id") String case_id,
+                                            @Param("exec_parameter") String exec_parameter);
 
     List<AutoCaseExec> findALL(String is_v);
 

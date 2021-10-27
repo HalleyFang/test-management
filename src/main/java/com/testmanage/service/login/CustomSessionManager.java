@@ -2,7 +2,6 @@ package com.testmanage.service.login;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.session.Session;
-import org.apache.shiro.session.SessionListener;
 import org.apache.shiro.session.UnknownSessionException;
 import org.apache.shiro.session.mgt.SessionKey;
 import org.apache.shiro.web.servlet.ShiroHttpServletRequest;

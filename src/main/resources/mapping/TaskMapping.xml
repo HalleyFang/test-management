@@ -45,6 +45,7 @@
         <include refid="table"></include>
         where
         is_v=#{is_v}
+        order by id desc
     </select>
     <select id="findTaskById" resultType="com.testmanage.entity.Task">
         select * from

@@ -44,7 +44,8 @@
     </select>
     <select id="findExecId" resultType="java.lang.Long">
         SELECT exec_id FROM
-        <include refid="table"></include> t
+        <include refid="table"></include>
+        t
         left join case_info c
         on t.case_id=c.case_id
         where c.is_v=#{is_v}
@@ -67,7 +68,8 @@
     </select>
     <select id="findALL" resultType="com.testmanage.entity.AutoCaseExec">
         select t.* from
-        <include refid="table"></include> t
+        <include refid="table"></include>
+        t
         left join case_info c
         on t.case_id=c.case_id
         where c.is_v=#{is_v}
@@ -81,7 +83,8 @@
         min(t.start_date) as min_start_date,
         max(t.end_date) as max_end_date
         from
-        <include refid="table"></include> t
+        <include refid="table"></include>
+        t
         left join case_info c
         on t.case_id=c.case_id
         where c.is_v=#{is_v} and (t.exec_id BETWEEN #{minId} and #{maxId})

@@ -17,23 +17,23 @@ public class DingDingMsgSend {
 
     public synchronized void sendDingDingMsg(String name) throws Exception {
         DingDingConf.Config config = getConfig(name);
-        if(config == null){
+        if (config == null) {
             throw new Exception("钉钉消息配置不正确");
         }
-        String dingDingToken=config.getToken();
-        Map<String,Object> json=new HashMap();
-        Map<String,Object> text=new HashMap();
-        json.put("msgtype","text");
-        text.put("content",config.getContent());
-        json.put("text",text);
+        String dingDingToken = config.getToken();
+        Map<String, Object> json = new HashMap();
+        Map<String, Object> text = new HashMap();
+        json.put("msgtype", "text");
+        text.put("content", config.getContent());
+        json.put("text", text);
         DingDingMsg.sendPostByMap(dingDingToken, json);
     }
 
 
-    private DingDingConf.Config getConfig(String name){
+    private DingDingConf.Config getConfig(String name) {
         List<DingDingConf.Config> configs = dingDingConf.getConfigs();
-        for(DingDingConf.Config config:configs){
-            if(config.getName().equalsIgnoreCase(name)){
+        for (DingDingConf.Config config : configs) {
+            if (config.getName().equalsIgnoreCase(name)) {
                 return config;
             }
         }

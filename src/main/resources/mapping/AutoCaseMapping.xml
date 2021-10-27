@@ -33,9 +33,11 @@
     </select>
     <select id="queryCaseCount" resultType="java.lang.Integer">
         select count(*) from
-        <include refid="table"></include> t
+        <include refid="table"></include>
+        t
         left join
-        <include refid="caseInfo"></include> c
+        <include refid="caseInfo"></include>
+        c
         on t.case_id=c.case_id
         where c.is_v = #{is_v}
     </select>

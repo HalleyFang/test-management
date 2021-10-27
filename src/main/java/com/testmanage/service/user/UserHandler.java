@@ -9,10 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Component
 @Slf4j
@@ -40,10 +38,10 @@ public class UserHandler implements HandlerInterceptor {
         }
         */
 
-        if(path.equalsIgnoreCase("/auth/login")){
+        if (path.equalsIgnoreCase("/auth/login")) {
             return true;
         }
-        if(path.equalsIgnoreCase("/addAutoCase")){
+        if (path.equalsIgnoreCase("/addAutoCase")) {
             return true;
         }
         try {

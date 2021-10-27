@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.testmanage.entity.CaseInfo;
 import com.testmanage.mapper.CaseInfoMapper;
 import com.testmanage.utils.JsonParse;
-import jodd.util.collection.MapEntry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,13 +65,13 @@ public class CaseBodyToInfo {
         stringBuffer.append("[");
         for (Map.Entry<Integer, String> entry : opMap.entrySet()) {
             stringBuffer.append("{\"step\":\"").append(entry.getValue()).append("\",\"expect\":\"");
-            if (expMap.get(entry.getKey())!=null && !expMap.get(entry.getKey()).isEmpty()) {
+            if (expMap.get(entry.getKey()) != null && !expMap.get(entry.getKey()).isEmpty()) {
                 stringBuffer.append(expMap.get(entry.getKey()));
             }
             stringBuffer.append("\"},");
         }
         String step = stringBuffer.substring(0, stringBuffer.lastIndexOf(","));
-        step = step +"]";
+        step = step + "]";
         caseInfo.setCase_step(step);
         return caseInfo;
     }
@@ -81,9 +80,9 @@ public class CaseBodyToInfo {
     private Map<Integer, String> opStr(String str) {
         String[] strings = str.split("\n");
         List<String> list = new ArrayList<>();
-        for (int i=0;i<strings.length;i++) {
+        for (int i = 0; i < strings.length; i++) {
             String s = strings[i];
-            if(i==0 && !s.matches("^[0-9]+[.].*")){
+            if (i == 0 && !s.matches("^[0-9]+[.].*")) {
                 list.add(str);
                 break;
             }

@@ -7,7 +7,7 @@
         <include refid="table"/>
         (exec_id,case_id,exec_parameter,exec_time,failed_rate,exec_total,failed_count,is_v)
         values
-        <foreach collection ="scatterCharts" item="scatterChart" index= "index" separator =",">
+        <foreach collection="scatterCharts" item="scatterChart" index="index" separator=",">
             (#{scatterChart.exec_id},#{scatterChart.case_id},#{scatterChart.exec_parameter},
             #{scatterChart.exec_time},#{scatterChart.failed_rate},#{scatterChart.exec_total},
             #{scatterChart.failed_count},#{scatterChart.is_v})
